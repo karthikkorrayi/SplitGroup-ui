@@ -1,15 +1,16 @@
-@import '~@angular/material/theming';
+// Import Angular Material theming (updated import path)
+@use '@angular/material' as mat;
 
 // Include the common styles for Angular Material
-@include mat-core();
+@include mat.core();
 
 // Define your custom theme colors
-$primary: mat-palette($mat-green, 600);
-$accent: mat-palette($mat-grey, 200);
-$warn: mat-palette($mat-red);
+$primary: mat.define-palette(mat.$green-palette, 600);
+$accent: mat.define-palette(mat.$grey-palette, 200);
+$warn: mat.define-palette(mat.$red-palette);
 
 // Create theme
-$theme: mat-light-theme((
+$theme: mat.define-light-theme((
   color: (
     primary: $primary,
     accent: $accent,
@@ -18,7 +19,7 @@ $theme: mat-light-theme((
 ));
 
 // Include theme styles for core and each component
-@include angular-material-theme($theme);
+@include mat.all-component-themes($theme);
 
 // Global styles
 * {

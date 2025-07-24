@@ -1,0 +1,139 @@
+.dashboard-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+  text-align: center;
+  
+  h1 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-weight: 400;
+  }
+  
+  .dashboard-subtitle {
+    margin: 0;
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.summary-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+  
+  &.positive {
+    border-left: 4px solid #4caf50;
+  }
+  
+  &.negative {
+    border-left: 4px solid #f44336;
+  }
+  
+  &.neutral {
+    border-left: 4px solid #2196f3;
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    color: #666;
+    
+    mat-icon {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+    
+    span {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  }
+  
+  .amount {
+    font-size: 1.8rem;
+    font-weight: 600;
+    
+    &.positive {
+      color: #4caf50;
+    }
+    
+    &.negative {
+      color: #f44336;
+    }
+  }
+}
+
+.quick-actions-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  
+  button {
+    flex: 1;
+    min-width: 140px;
+    height: 48px;
+    
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+    }
+  }
+}

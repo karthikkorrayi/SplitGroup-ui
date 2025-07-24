@@ -1,0 +1,53 @@
+<mat-card class="balance-summary-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>account_balance</mat-icon>
+      Your Balances
+    </mat-card-title>
+    <div class="card-actions">
+      <button mat-button color="primary" routerLink="/balances">
+        View All
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <mat-spinner diameter="30"></mat-spinner>
+      <span>Loading balances...</span>
+    </div>
+    
+    <!-- Empty State -->
+    <div *ngIf="!loading && (!balances || balances.length === 0)" class="empty-state">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <h3>No balances yet</h3>
+      <p>Start adding expenses to see your balances here</p>
+      <button mat-raised-button color="primary" routerLink="/transactions/create">
+        Add Your First Expense
+      </button>
+    </div>
+    
+    <!-- Balances List -->
+    <div *ngIf="!loading && balances && balances.length > 0" class="balances-list">
+      <div *ngFor="let balance of displayBalances" class="balance-item">
+        <div class="balance-info">
+          <div class="friend-name">{{ getFriendName(balance) }}</div>
+          <div class="balance-description">{{ balance.description }}</div>
+        </div>
+        <div class="balance-amount" 
+             [class.positive]="isOwedToMe(balance)" 
+             [class.negative]="!isOwedToMe(balance)">
+          <span class="amount">{{ getDisplayAmount(balance) | currency }}</span>
+          <mat-chip-list>
+            <mat-chip [class.settled-chip]="balance.isSettled" 
+                      [class.active-chip]="!balance.isSettled">
+              {{ balance.isSettled ? 'Settled' : 'Active' }}
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

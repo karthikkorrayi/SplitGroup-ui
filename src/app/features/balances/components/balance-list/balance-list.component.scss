@@ -1,0 +1,291 @@
+.balance-list-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  
+  h1 {
+    margin: 0;
+    color: #333;
+  }
+  
+  button {
+    display: flex;
+    align-items: center;
+    
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.summary-section {
+  margin-bottom: 32px;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.summary-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+  
+  &.positive {
+    border-left: 4px solid #4caf50;
+  }
+  
+  &.negative {
+    border-left: 4px solid #f44336;
+  }
+  
+  &.neutral {
+    border-left: 4px solid #2196f3;
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    color: #666;
+    
+    mat-icon {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+    
+    span {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  }
+  
+  .amount {
+    font-size: 1.8rem;
+    font-weight: 600;
+    
+    &.positive {
+      color: #4caf50;
+    }
+    
+    &.negative {
+      color: #f44336;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 24px;
+    color: #ccc;
+  }
+  
+  h2 {
+    margin: 0 0 12px 0;
+    color: #333;
+  }
+  
+  p {
+    margin: 0 0 32px 0;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+  
+  button {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.balances-section {
+  h2 {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-weight: 400;
+  }
+}
+
+.balances-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.balance-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+  
+  &.settled {
+    opacity: 0.7;
+    background-color: #f9f9f9;
+  }
+  
+  .balance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    
+    .friend-info {
+      display: flex;
+      align-items: center;
+      
+      .friend-avatar {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        margin-right: 12px;
+        color: #666;
+      }
+      
+      .friend-details {
+        .friend-name {
+          font-size: 1.1rem;
+          font-weight: 500;
+          color: #333;
+        }
+        
+        .balance-id {
+          font-size: 0.8rem;
+          color: #999;
+          margin-top: 2px;
+        }
+      }
+    }
+    
+    mat-chip {
+      &.settled-chip {
+        background-color: #e8f5e8;
+        color: #4caf50;
+      }
+      
+      &.active-chip {
+        background-color: #fff3e0;
+        color: #ff9800;
+      }
+    }
+  }
+  
+  .balance-amount-section {
+    margin-bottom: 20px;
+    
+    .balance-description {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    
+    .balance-amount {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+      .amount {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      
+      .direction {
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+      
+      &.positive {
+        .amount {
+          color: #4caf50;
+        }
+        .direction {
+          color: #4caf50;
+        }
+      }
+      
+      &.negative {
+        .amount {
+          color: #f44336;
+        }
+        .direction {
+          color: #f44336;
+        }
+      }
+    }
+  }
+  
+  .balance-actions {
+    display: flex;
+    justify-content: center;
+    
+    button {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 44px;
+      
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .balance-list-container {
+    padding: 16px;
+  }
+  
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .balances-grid {
+    grid-template-columns: 1fr;
+  }
+}

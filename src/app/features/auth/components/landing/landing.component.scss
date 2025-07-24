@@ -1,0 +1,102 @@
+.landing-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.landing-content {
+  text-align: center;
+  color: white;
+  max-width: 800px;
+}
+
+.hero-section {
+  margin-bottom: 60px;
+  
+  .hero-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    color: #4caf50;
+  }
+  
+  h1 {
+    font-size: 3rem;
+    margin: 0 0 16px 0;
+    font-weight: 300;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+    margin: 0;
+    opacity: 0.9;
+  }
+}
+
+.features-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 60px;
+  
+  .feature {
+    text-align: center;
+    
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      color: #4caf50;
+    }
+    
+    h3 {
+      margin: 0 0 12px 0;
+      font-size: 1.3rem;
+    }
+    
+    p {
+      margin: 0;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+  }
+}
+
+.action-section {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  
+  .action-btn {
+    min-width: 120px;
+    height: 48px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    margin-bottom: 40px;
+    
+    .hero-icon {
+      font-size: 60px;
+      width: 60px;
+      height: 60px;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+  }
+  
+  .features-section {
+    margin-bottom: 40px;
+    gap: 30px;
+  }
+}

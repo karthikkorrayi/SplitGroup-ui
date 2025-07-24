@@ -1,0 +1,74 @@
+<div class="settlement-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>payment</mat-icon>
+    Settle Balance
+  </h2>
+  
+  <mat-dialog-content>
+    <div class="settlement-info">
+      <div class="friend-info">
+        <mat-icon class="friend-avatar">account_circle</mat-icon>
+        <div class="friend-details">
+          <div class="friend-name">{{ getFriendName() }}</div>
+          <div class="current-balance">
+            Current Balance: 
+            <span [class.positive]="isOwedToMe()" [class.negative]="!isOwedToMe()">
+              {{ getDisplayAmount() | currency }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="settlementForm" class="settlement-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Settlement Amount</mat-label>
+        <input matInput 
+               type="number" 
+               formControlName="amount" 
+               placeholder="0.00"
+               step="0.01">
+        <span matPrefix>interfacenbsp;</span>
+        <mat-hint>Maximum: {{ getDisplayAmount() | currency }}</mat-hint>
+        <mat-error *ngIf="settlementForm.get('amount')?.hasError('required')">
+          Amount is required
+        </mat-error>
+        <mat-error *ngIf="settlementForm.get('amount')?.hasError('min')">
+          Amount must be greater than 0
+        </mat-error>
+        <mat-error *ngIf="settlementForm.get('amount')?.hasError('max')">
+          Amount cannot exceed {{ getDisplayAmount() | currency }}
+        </mat-error>
+      </mat-form-field>
+
+      <div class="settlement-summary">
+        <div class="summary-item">
+          <span>From:</span>
+          <span class="value">{{ getPayerName() }}</span>
+        </div>
+        <div class="summary-item">
+          <span>To:</span>
+          <span class="value">{{ getReceiverName() }}</span>
+        </div>
+        <div class="summary-item">
+          <span>Amount:</span>
+          <span class="value amount">{{ settlementForm.get('amount')?.value | currency }}</span>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isLoading">
+      Cancel
+    </button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="onSettle()"
+            [disabled]="settlementForm.invalid || isLoading">
+      <mat-spinner diameter="16" *ngIf="isLoading"></mat-spinner>
+      <mat-icon *ngIf="!isLoading">check</mat-icon>
+      <span>{{ isLoading ? 'Processing...' : 'Settle' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

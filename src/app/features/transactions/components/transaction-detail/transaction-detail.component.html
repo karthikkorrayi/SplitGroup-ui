@@ -1,0 +1,101 @@
+<div class="transaction-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading transaction details...</p>
+  </div>
+
+  <!-- Transaction Details -->
+  <div *ngIf="!isLoading && transaction" class="transaction-details">
+    <!-- Header -->
+    <div class="detail-header">
+      <button mat-button routerLink="/transactions">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Transactions
+      </button>
+      <h1>Transaction Details</h1>
+    </div>
+
+    <!-- Main Info Card -->
+    <mat-card class="main-info-card">
+      <mat-card-content>
+        <div class="transaction-info">
+          <div class="info-section">
+            <div class="amount-display">
+              <span class="currency">$</span>
+              <span class="amount">{{ transaction.amount }}</span>
+            </div>
+            <div class="description">{{ transaction.description }}</div>
+            <div class="category">
+              <mat-icon>{{ getCategoryIcon(transaction.category) }}</mat-icon>
+              {{ transaction.category }}
+            </div>
+          </div>
+
+          <div class="status-section">
+            <mat-chip [class]="getStatusClass(transaction.status)">
+              {{ transaction.status }}
+            </mat-chip>
+            <div class="date">{{ transaction.createdAt | date:'MMM d, y' }}</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Participants Card -->
+    <mat-card class="participants-card">
+      <mat-card-header>
+        <mat-card-title>Participants</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="participants-info">
+          <div class="participant paid-by">
+            <mat-icon>account_circle</mat-icon>
+            <div class="participant-details">
+              <div class="name">{{ transaction.paidByName }}</div>
+              <div class="role">Paid the bill</div>
+            </div>
+            <div class="amount">{{ transaction.totalAmount | currency }}</div>
+          </div>
+
+          <div class="split-arrow">
+            <mat-icon>arrow_downward</mat-icon>
+            <span>{{ transaction.splitType }} Split</span>
+          </div>
+
+          <div class="participant owed-by">
+            <mat-icon>account_circle</mat-icon>
+            <div class="participant-details">
+              <div class="name">{{ transaction.owedByName }}</div>
+              <div class="role">Owes</div>
+            </div>
+            <div class="amount">{{ transaction.amount | currency }}</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions Card -->
+    <mat-card class="actions-card" *ngIf="transaction.status === 'ACTIVE'">
+      <mat-card-header>
+        <mat-card-title>Actions</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="action-buttons">
+          <button mat-raised-button color="primary">
+            <mat-icon>edit</mat-icon>
+            Edit Transaction
+          </button>
+          <button mat-raised-button color="accent">
+            <mat-icon>check_circle</mat-icon>
+            Mark as Settled
+          </button>
+          <button mat-raised-button color="warn">
+            <mat-icon>delete</mat-icon>
+            Delete Transaction
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
