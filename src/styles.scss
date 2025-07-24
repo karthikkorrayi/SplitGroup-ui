@@ -1,25 +1,5 @@
-// Import Angular Material theming (updated import path)
-@use '@angular/material' as mat;
-
-// Include the common styles for Angular Material
-@include mat.core();
-
-// Define your custom theme colors
-$primary: mat.define-palette(mat.$green-palette, 600);
-$accent: mat.define-palette(mat.$grey-palette, 200);
-$warn: mat.define-palette(mat.$red-palette);
-
-// Create theme
-$theme: mat.define-light-theme((
-  color: (
-    primary: $primary,
-    accent: $accent,
-    warn: $warn,
-  )
-));
-
-// Include theme styles for core and each component
-@include mat.all-component-themes($theme);
+// Import Angular Material core
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 // Global styles
 * {
@@ -28,10 +8,14 @@ $theme: mat.define-light-theme((
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Roboto', sans-serif;
+html, body { 
+  height: 100%; 
+}
+
+body { 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
   background-color: #f5f5f5;
-  margin: 0;
 }
 
 .full-width {
@@ -40,24 +24,6 @@ body {
 
 .text-center {
   text-align: center;
-}
-
-.error-snackbar {
-  background-color: #f44336 !important;
-  color: white !important;
-}
-
-.success-snackbar {
-  background-color: #4caf50 !important;
-  color: white !important;
-}
-
-// Custom card styles
-.feature-card {
-  margin: 16px;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 // Loading spinner overlay
@@ -73,3 +39,5 @@ body {
   align-items: center;
   z-index: 9999;
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
