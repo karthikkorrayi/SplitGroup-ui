@@ -1,30 +1,13 @@
 .app-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-nav {
-  margin: 20px 0;
-  padding: 10px 0;
-}
-
-nav a {
-  margin-right: 15px;
-  padding: 8px 16px;
-  text-decoration: none;
-  background-color: #f0f0f0;
-  border-radius: 4px;
-  color: #333;
-}
-
-nav a:hover {
-  background-color: #ddd;
-}
-
-hr {
-  margin: 20px 0;
-  border: 0;
-  border-top: 1px solid #ccc;
+.main-content {
+  flex: 1;
+  
+  &.with-header {
+    margin-top: 64px;
+  }
 }

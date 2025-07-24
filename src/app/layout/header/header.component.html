@@ -1,0 +1,35 @@
+<mat-toolbar color="primary" class="app-toolbar">
+  <span class="toolbar-title">
+    <mat-icon class="logo-icon">account_balance_wallet</mat-icon>
+    SplitWise
+  </span>
+  
+  <span class="spacer"></span>
+  
+  <div class="user-menu" *ngIf="currentUser">
+    <span class="user-name">{{ currentUser.name }}</span>
+    <button mat-icon-button [matMenuTriggerFor]="userMenu">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item routerLink="/dashboard">
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </button>
+      <button mat-menu-item routerLink="/transactions">
+        <mat-icon>receipt</mat-icon>
+        <span>Transactions</span>
+      </button>
+      <button mat-menu-item routerLink="/balances">
+        <mat-icon>account_balance</mat-icon>
+        <span>Balances</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>

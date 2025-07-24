@@ -1,17 +1,15 @@
 export interface User {
-  id: number;
+  userId: number;
   email: string;
   name: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-export interface AuthResponse {
+export interface LoginResponse {
   token: string;
   email: string;
   name: string;
   userId: number;
-  message?: string;
+  message: string;
 }
 
 export interface LoginRequest {
