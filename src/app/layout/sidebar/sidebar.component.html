@@ -1,0 +1,56 @@
+<div class="sidebar">
+  <!-- User Info Section -->
+  <div class="user-section">
+    <div class="user-avatar">
+      {{ getUserInitials() }}
+    </div>
+    <div class="user-info" *ngIf="!isHandset">
+      <div class="user-name">{{ currentUser?.name }}</div>
+      <div class="user-email">{{ currentUser?.email }}</div>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Navigation Items -->
+  <nav class="nav-menu">
+    <mat-list>
+      <mat-list-item 
+        *ngFor="let item of navItems"
+        class="nav-item"
+        [class.active]="isRouteActive(item.route)"
+        (click)="onNavItemClick(item)">
+
+        <mat-icon matListIcon>{{ item.icon }}</mat-icon>
+        <span matLine>{{ item.label }}</span>
+        
+        <span class="nav-badge" *ngIf="item.badge" [matBadge]="item.badge" matBadgeColor="warn" matBadgeSize="small">
+        </span>
+      </mat-list-item>
+    </mat-list>
+  </nav>
+
+  <mat-divider></mat-divider>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h3 class="section-title">Quick Actions</h3>
+    
+    <button mat-stroked-button class="quick-action-btn" (click)="onNavItemClick({label: 'Add Expense', icon: 'add', route: '/transactions/create'})">
+      <mat-icon>add_circle</mat-icon>
+      Add Expense
+    </button>
+    
+    <button mat-stroked-button class="quick-action-btn" (click)="onNavItemClick({label: 'Settle Up', icon: 'payment', route: '/balances/settle'})">
+      <mat-icon>payment</mat-icon>
+      Settle Up
+    </button>
+  </div>
+
+  <!-- App Info -->
+  <div class="app-info">
+    <div class="version-info">
+      <small>SplitGroup v1.0.0</small>
+    </div>
+  </div>
+</div>

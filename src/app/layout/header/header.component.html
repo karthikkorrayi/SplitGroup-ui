@@ -1,0 +1,117 @@
+<mat-toolbar color="primary" class="header">
+  <!-- Menu Button for Mobile -->
+  <button
+    type="button"
+    aria-label="Toggle sidenav"
+    mat-icon-button
+    (click)="onMenuClick()"
+    *ngIf="isHandset">
+    <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+  </button>
+
+  <!-- App Title -->
+  <span class="app-title" [class.mobile-title]="isHandset">
+    <mat-icon class="app-icon">account_balance_wallet</mat-icon>
+    SplitGroup
+  </span>
+
+  <span class="spacer"></span>
+  
+  <!-- Search (Desktop only) -->
+  <div class="search-container" *ngIf="!isHandset">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search transactions...</mat-label>
+      <input matInput type="text" placeholder="Search transactions...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Notifications -->
+  <button mat-icon-button class="header-icon-button" [matMenuTriggerFor]="notificationMenu">
+    <mat-icon [matBadge]="3" matBadgeColor="warn" matBadgeSize="small">notifications</mat-icon>
+  </button>
+
+  <!-- User Menu -->
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+    <div class="avatar-circle">
+      {{ getUserInitials() }}
+    </div>
+  </button>
+</mat-toolbar>
+
+<!-- Notification Menu -->
+<mat-menu #notificationMenu="matMenu" class="notification-menu">
+  <div class="menu-header">
+    <h3>Notifications</h3>
+    <button mat-button color="primary">Mark all read</button>
+  </div>
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item class="notification-item">
+    <mat-icon>account_balance_wallet</mat-icon>
+    <div class="notification-content">
+      <div class="notification-title">New expense added</div>
+      <div class="notification-subtitle">John added "Dinner" - ₹50.00</div>
+      <div class="notification-time">2 minutes ago</div>
+    </div>
+  </button>
+
+  <button mat-menu-item class="notification-item">
+    <mat-icon>payment</mat-icon>
+    <div class="notification-content">
+      <div class="notification-title">Settlement received</div>
+      <div class="notification-subtitle">Jane settled ₹25.00</div>
+      <div class="notification-time">1 hour ago</div>
+    </div>
+  </button>
+  
+  <button mat-menu-item class="notification-item">
+    <mat-icon>group_add</mat-icon>
+    <div class="notification-content">
+      <div class="notification-title">Added to group</div>
+      <div class="notification-subtitle">You were added to "Roommates"</div>
+      <div class="notification-time">3 hours ago</div>
+    </div>
+  </button>
+
+  <mat-divider></mat-divider>
+  <button mat-menu-item class="view-all-btn">
+    <span>View all notifications</span>
+  </button>
+</mat-menu>
+
+<!-- User Menu -->
+<mat-menu #userMenu="matMenu" class="user-menu">
+  <div class="user-info">
+    <div class="user-avatar-large">
+      {{ getUserInitials() }}
+    </div>
+    <div class="user-details">
+      <div class="user-name">{{ currentUser?.name }}</div>
+      <div class="user-email">{{ currentUser?.email }}</div>
+    </div>
+  </div>
+  <mat-divider></mat-divider>
+
+  <button mat-menu-item (click)="onProfileClick()">
+    <mat-icon>person</mat-icon>
+    <span>Profile</span>
+  </button>
+  
+  <button mat-menu-item (click)="onSettingsClick()">
+    <mat-icon>settings</mat-icon>
+    <span>Settings</span>
+  </button>
+  
+  <button mat-menu-item>
+    <mat-icon>help</mat-icon>
+    <span>Help & Support</span>
+  </button>
+  
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item (click)="onLogout()" class="logout-btn">
+    <mat-icon>exit_to_app</mat-icon>
+    <span>Logout</span>
+  </button>
+</mat-menu>

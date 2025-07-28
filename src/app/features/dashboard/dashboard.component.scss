@@ -1,0 +1,404 @@
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 1rem;
+  
+  p {
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+// Welcome Section
+.welcome-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .welcome-text {
+    .welcome-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 0.5rem 0;
+      
+      @media (max-width: 768px) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .welcome-subtitle {
+      color: #666;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+  }
+  
+  .quick-actions-header {
+    display: flex;
+    gap: 1rem;
+    
+    @media (max-width: 768px) {
+      width: 100%;
+      
+      button {
+        flex: 1;
+      }
+    }
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+// Stats Grid
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  mat-card-content {
+    padding: 1.5rem;
+  }
+  
+  .stat-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    
+    .stat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    
+    .stat-title {
+      font-weight: 500;
+      color: #666;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .stat-description {
+    color: #999;
+    font-size: 0.85rem;
+  }
+
+  // Card color themes
+  &.stat-card-success {
+    border-left: 4px solid #4caf50;
+    
+    .stat-icon {
+      color: #4caf50;
+    }
+  }
+  
+  &.stat-card-warn {
+    border-left: 4px solid #ff9800;
+    
+    .stat-icon {
+      color: #ff9800;
+    }
+  }
+  
+  &.stat-card-primary {
+    border-left: 4px solid #3f51b5;
+    
+    .stat-icon {
+      color: #3f51b5;
+    }
+  }
+
+  &.stat-card-accent {
+    border-left: 4px solid #9c27b0;
+    
+    .stat-icon {
+      color: #9c27b0;
+    }
+  }
+}
+
+// Content Grid
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+// Card Styles
+.transactions-card, .balances-card {
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+  }
+  
+  mat-card-content {
+    padding-top: 0;
+  }
+}
+
+// Transaction Styles
+.transaction-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .transaction-icon {
+    color: #666;
+  }
+  
+  .transaction-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    
+    .transaction-description {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .transaction-amount {
+      font-weight: 600;
+    }
+  }
+  
+  .transaction-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .transaction-participants {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .transaction-category {
+      font-size: 0.75rem;
+      height: 24px;
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+  }
+}
+
+// Balance Styles
+.balance-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .balance-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .balance-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    
+    .balance-name {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .balance-amount {
+      font-weight: 600;
+    }
+  }
+  
+  .balance-description {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .balance-action {
+    color: #3f51b5;
+  }
+}
+
+// Quick Actions Card
+.quick-actions-card {
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  height: auto;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(63, 81, 181, 0.04);
+    border-color: #3f51b5;
+    transform: translateY(-1px);
+  }
+  
+  mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    color: #3f51b5;
+  }
+  
+  .action-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    
+    .action-title {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .action-subtitle {
+      font-size: 0.85rem;
+      color: #666;
+      text-align: center;
+    }
+  }
+}
+
+// Empty States
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  
+  .empty-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    color: #666;
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+  }
+  
+  p {
+    color: #999;
+    margin: 0 0 2rem 0;
+  }
+  
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 auto;
+  }
+}

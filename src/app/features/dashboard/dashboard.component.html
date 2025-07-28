@@ -1,0 +1,199 @@
+<div class="dashboard-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading" class="dashboard-content">
+    
+    <!-- Welcome Header -->
+    <div class="welcome-section">
+      <div class="welcome-text">
+        <h1 class="welcome-title">{{ getWelcomeMessage() }}</h1>
+        <p class="welcome-subtitle">Here's what's happening with your expenses</p>
+      </div>
+      
+      <div class="quick-actions-header">
+        <button mat-raised-button color="primary" (click)="onCreateTransaction()">
+          <mat-icon>add</mat-icon>
+          Add Expense
+        </button>
+        <button mat-stroked-button color="accent" (click)="onSettleUp()">
+          <mat-icon>payment</mat-icon>
+          Settle Up
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <mat-card *ngFor="let card of statCards" class="stat-card" [class]="'stat-card-' + card.color">
+        <mat-card-content>
+          <div class="stat-header">
+            <mat-icon class="stat-icon">{{ card.icon }}</mat-icon>
+            <span class="stat-title">{{ card.title }}</span>
+          </div>
+          
+          <div class="stat-value" [class]="getAmountClass(card.value)">
+            <span *ngIf="card.title.includes('Balance') || card.title.includes('Owed') || card.title.includes('Owing')">
+              {{ formatCurrency(card.value) }}
+            </span>
+            <span *ngIf="card.title === 'Transactions'">
+              {{ card.value }}
+            </span>
+          </div>
+          
+          <div class="stat-description">
+            {{ card.description }}
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Main Content Grid -->
+     <div class="content-grid">
+      
+      <!-- Recent Transactions -->
+      <mat-card class="transactions-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>receipt_long</mat-icon>
+            Recent Transactions
+          </mat-card-title>
+          <div class="spacer"></div>
+          <button mat-button color="primary" (click)="onViewAllTransactions()">
+            View All
+          </button>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div *ngIf="getRecentTransactions().length === 0" class="empty-state">
+            <mat-icon class="empty-icon">receipt_long</mat-icon>
+            <h3>No transactions yet</h3>
+            <p>Start by adding your first expense!</p>
+            <button mat-raised-button color="primary" (click)="onCreateTransaction()">
+              <mat-icon>add</mat-icon>
+              Add First Expense
+            </button>
+          </div>
+
+          <mat-list *ngIf="getRecentTransactions().length > 0">
+            <mat-list-item *ngFor="let transaction of getRecentTransactions()" class="transaction-item">
+              <mat-icon matListIcon class="transaction-icon">{{ getCategoryIcon(transaction.category) }}</mat-icon>
+              
+              <div matLine class="transaction-main">
+                <span class="transaction-description">{{ transaction.description }}</span>
+                <span class="transaction-amount" [class]="getAmountClass(transaction.amount)">
+                  {{ formatCurrency(transaction.amount) }}
+                </span>
+              </div>
+              
+              <div matLine class="transaction-details">
+                <span class="transaction-participants">
+                  {{ transaction.paidByName }} → {{ transaction.owedByName }}
+                </span>
+                <mat-chip class="transaction-category">{{ transaction.category }}</mat-chip>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Balance Overview -->
+       <mat-card class="balances-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>account_balance</mat-icon>
+            Balance Overview
+          </mat-card-title>
+          <div class="spacer"></div>
+          <button mat-button color="primary" (click)="onViewAllBalances()">
+            View All
+          </button>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div *ngIf="getTopBalances().length === 0" class="empty-state">
+            <mat-icon class="empty-icon">account_balance</mat-icon>
+            <h3>No balances yet</h3>
+            <p>Your balances will appear here after adding transactions.</p>
+          </div>
+          
+          <mat-list *ngIf="getTopBalances().length > 0">
+            <mat-list-item *ngFor="let balance of getTopBalances()" class="balance-item">
+              <div matListIcon class="balance-avatar">
+                {{ getInitials(balance.user1Name === currentUser?.name ? balance.user2Name : balance.user1Name) }}
+              </div>
+
+              <div matLine class="balance-main">
+                <span class="balance-name">
+                  {{ balance.user1Name === currentUser?.name ? balance.user2Name : balance.user1Name }}
+                </span>
+                <span class="balance-amount" [class]="getAmountClass(balance.amount)">
+                  {{ formatCurrency(balance.amount) }}
+                </span>
+              </div>
+              
+              <div matLine class="balance-description">
+                {{ balance.description }}
+              </div>
+              
+              <button mat-icon-button class="balance-action" (click)="onSettleUp()">
+                <mat-icon>payment</mat-icon>
+              </button>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Quick Actions Section -->
+     <mat-card class="quick-actions-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>flash_on</mat-icon>
+          Quick Actions
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="actions-grid">
+          <button mat-stroked-button class="action-button" (click)="onCreateTransaction()">
+            <mat-icon>add_circle</mat-icon>
+            <div class="action-content">
+              <span class="action-title">Add Expense</span>
+              <span class="action-subtitle">Split a new bill or expense</span>
+            </div>
+          </button>
+          
+          <button mat-stroked-button class="action-button" (click)="onSettleUp()">
+            <mat-icon>payment</mat-icon>
+            <div class="action-content">
+              <span class="action-title">Settle Up</span>
+              <span class="action-subtitle">Pay back what you owe</span>
+            </div>
+          </button>
+
+          <button mat-stroked-button class="action-button" (click)="onViewAllTransactions()">
+            <mat-icon>history</mat-icon>
+            <div class="action-content">
+              <span class="action-title">View History</span>
+              <span class="action-subtitle">See all your transactions</span>
+            </div>
+          </button>
+          
+          <button mat-stroked-button class="action-button" routerLink="/reports">
+            <mat-icon>analytics</mat-icon>
+            <div class="action-content">
+              <span class="action-title">Reports</span>
+              <span class="action-subtitle">Analyze your spending</span>
+            </div>
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>
