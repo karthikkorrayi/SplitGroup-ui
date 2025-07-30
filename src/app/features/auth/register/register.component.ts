@@ -1,14 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
+import { Subject, takeUntil, Observable } from 'rxjs';
+
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -17,14 +20,13 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterModule,
     MatCardModule,
-    MatButtonModule,
-    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule
   ],
   template: `
     <div class="auth-container">
@@ -44,7 +46,8 @@ import { AuthService } from '../../../core/services/auth.service';
                   matInput 
                   type="text" 
                   formControlName="name"
-                  placeholder="Enter your full name">
+                  placeholder="Enter your full name"
+                  autocomplete="name">
                 <mat-icon matSuffix>person</mat-icon>
                 <mat-error *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid">
                   {{ getErrorMessage('name') }}
@@ -58,7 +61,8 @@ import { AuthService } from '../../../core/services/auth.service';
                   matInput 
                   type="email" 
                   formControlName="email"
-                  placeholder="Enter your email">
+                  placeholder="Enter your email"
+                  autocomplete="email">
                 <mat-icon matSuffix>email</mat-icon>
                 <mat-error *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
                   {{ getErrorMessage('email') }}
@@ -72,11 +76,14 @@ import { AuthService } from '../../../core/services/auth.service';
                   matInput 
                   [type]="hidePassword ? 'password' : 'text'"
                   formControlName="password"
-                  placeholder="Create a password">
+                  placeholder="Create a strong password"
+                  autocomplete="new-password">
                 <button 
                   mat-icon-button 
                   matSuffix 
                   (click)="hidePassword = !hidePassword"
+                  [attr.aria-label]="'Hide password'" 
+                  [attr.aria-pressed]="hidePassword"
                   type="button">
                   <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
@@ -92,11 +99,14 @@ import { AuthService } from '../../../core/services/auth.service';
                   matInput 
                   [type]="hideConfirmPassword ? 'password' : 'text'"
                   formControlName="confirmPassword"
-                  placeholder="Confirm your password">
+                  placeholder="Confirm your password"
+                  autocomplete="new-password">
                 <button 
                   mat-icon-button 
                   matSuffix 
                   (click)="hideConfirmPassword = !hideConfirmPassword"
+                  [attr.aria-label]="'Hide password'" 
+                  [attr.aria-pressed]="hideConfirmPassword"
                   type="button">
                   <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
@@ -105,16 +115,26 @@ import { AuthService } from '../../../core/services/auth.service';
                 </mat-error>
               </mat-form-field>
 
+              <!-- Terms and Conditions -->
+              <div class="form-options">
+                <mat-checkbox formControlName="acceptTerms">
+                  I agree to the <a href="#" class="auth-link" target="_blank">Terms and Conditions</a> and <a href="#" class="auth-link" target="_blank">Privacy Policy</a>
+                </mat-checkbox>
+                <mat-error *ngIf="registerForm.get('acceptTerms')?.touched && registerForm.get('acceptTerms')?.invalid" class="terms-error">
+                  You must accept the terms and conditions
+                </mat-error>
+              </div>
+
               <!-- Submit Button -->
               <button 
                 mat-raised-button 
                 color="primary" 
                 type="submit"
                 class="full-width auth-submit-btn"
-                [disabled]="loading || registerForm.invalid">
-                <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
-                <span *ngIf="!loading">Create Account</span>
-                <span *ngIf="loading">Creating Account...</span>
+                [disabled]="registerForm.invalid || (isLoading$ | async)">
+                <mat-spinner *ngIf="isLoading$ | async" diameter="20" class="inline-spinner"></mat-spinner>
+                <span *ngIf="!(isLoading$ | async)">Create Account</span>
+                <span *ngIf="isLoading$ | async">Creating Account...</span>
               </button>
             </form>
           </mat-card-content>
@@ -122,7 +142,7 @@ import { AuthService } from '../../../core/services/auth.service';
           <mat-card-actions class="auth-actions">
             <p class="auth-link-text">
               Already have an account? 
-              <a routerLink="/auth/login" class="auth-link">Sign in here</a>
+              <a (click)="goToLogin()" class="auth-link">Sign in here</a>
             </p>
           </mat-card-actions>
         </mat-card>
@@ -172,6 +192,23 @@ import { AuthService } from '../../../core/services/auth.service';
       width: 100%;
     }
 
+    .form-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .form-options mat-checkbox {
+      font-size: 0.9rem;
+    }
+
+    .terms-error {
+      font-size: 0.75rem;
+      color: #f44336;
+      margin-top: 0.25rem;
+    }
+
     .auth-submit-btn {
       height: 48px;
       font-size: 1rem;
@@ -199,6 +236,7 @@ import { AuthService } from '../../../core/services/auth.service';
       color: #3f51b5;
       text-decoration: none;
       font-weight: 500;
+      cursor: pointer;
     }
 
     .auth-link:hover {
@@ -213,34 +251,71 @@ import { AuthService } from '../../../core/services/auth.service';
     }
   `]
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit, OnDestroy {
   registerForm: FormGroup;
-  loading = false;
   hidePassword = true;
   hideConfirmPassword = true;
+  isLoading$: Observable<boolean>;
+  
+  private destroy$ = new Subject<void>();
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar
+    private router: Router
   ) {
-    this.registerForm = this.formBuilder.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
-    }, {
-      validators: this.passwordMatchValidator
-    });
-
+    // Initialize observable after authService is available
+    this.isLoading$ = this.authService.isLoading$;
+    
     // Redirect if already logged in
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
+
+    this.registerForm = this.formBuilder.group({
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]],
+      acceptTerms: [false, [Validators.requiredTrue]]
+    }, {
+      validators: this.passwordMatchValidator
+    });
   }
 
-  // Custom validator to check if passwords match
+  ngOnInit(): void {
+    // Any initialization logic
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onSubmit(): void {
+    if (this.registerForm.valid) {
+      const { name, email, password } = this.registerForm.value;
+      
+      this.authService.register({ name, email, password })
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            console.log('Registration successful, navigating to dashboard');
+            this.router.navigate(['/dashboard']);
+          },
+          error: (error) => {
+            console.error('Registration failed:', error);
+          }
+        });
+    } else {
+      this.markFormGroupTouched();
+    }
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/auth/login']);
+  }
+
   private passwordMatchValidator(control: AbstractControl): { [key: string]: boolean } | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
@@ -251,53 +326,6 @@ export class RegisterComponent {
 
     return password.value !== confirmPassword.value ? { 'passwordMismatch': true } : null;
   }
-
-  onSubmit(): void {
-  if (this.registerForm.valid) {
-    this.loading = true;
-    
-    const { name, email, password } = this.registerForm.value;
-    
-    // For demo purposes, simulate successful registration
-    setTimeout(() => {
-      // Only store data if in browser environment
-      if (typeof window !== 'undefined' && window.localStorage) {
-        // Create mock user data
-        const mockUser = {
-          id: 1,
-          name: name,
-          email: email
-        };
-        
-        // Store mock data
-        localStorage.setItem('splitgroup_user', JSON.stringify(mockUser));
-        localStorage.setItem('splitgroup_token', 'demo-jwt-token');
-      }
-      
-      this.loading = false;
-      this.showMessage('Registration successful!', 'success');
-      this.router.navigate(['/dashboard']);
-    }, 1000);
-
-    // Uncomment this for real API integration:
-    /*
-    this.authService.register({ name, email, password }).subscribe({
-      next: (response) => {
-        this.loading = false;
-        this.showMessage('Registration successful!', 'success');
-        this.router.navigate(['/dashboard']);
-      },
-      error: (error) => {
-        this.loading = false;
-        const message = error.error?.message || 'Registration failed. Please try again.';
-        this.showMessage(message, 'error');
-      }
-    });
-    */
-  } else {
-    this.markFormGroupTouched();
-  }
-}
 
   private markFormGroupTouched(): void {
     Object.keys(this.registerForm.controls).forEach(key => {
@@ -327,12 +355,5 @@ export class RegisterComponent {
     }
     
     return '';
-  }
-
-  private showMessage(message: string, type: 'success' | 'error'): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: type === 'error' ? 'error-snackbar' : 'success-snackbar'
-    });
   }
 }

@@ -21,3 +21,11 @@ export interface RefreshTokenResponse {
   token: string;
   message: string;
 }
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
