@@ -18,7 +18,7 @@ export class AuthService {
   private isBrowser: boolean;
 
   private currentUserSubject: BehaviorSubject<User | null>;
-  public currentUser$ = this.currentUserSubject.asObservable();
+  public currentUser$: Observable<User | null>;
 
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   public isLoading$ = this.isLoadingSubject.asObservable();
@@ -31,6 +31,7 @@ export class AuthService {
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.currentUserSubject = new BehaviorSubject<User | null>(this.getCurrentUserFromStorage());
+    this.currentUser$ = this.currentUserSubject.asObservable();
     this.initializeFromStorage();
   }
 
@@ -130,7 +131,7 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    if (!this.isBrowser) return null;
+    if (!this.isBrowser || typeof localStorage === 'undefined') return null;
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
@@ -155,7 +156,7 @@ export class AuthService {
   }
 
   private storeAuthData(response: LoginResponse): void {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser || typeof localStorage === 'undefined') return;
     const user: User = {
       id: response.userId,
       name: response.name,
@@ -168,7 +169,7 @@ export class AuthService {
   }
 
   private clearAuthData(): void {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser || typeof localStorage === 'undefined') return;
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     this.currentUserSubject.next(null);
@@ -176,18 +177,18 @@ export class AuthService {
   }
 
   private setToken(token: string): void {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser || typeof localStorage === 'undefined') return;
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
   private updateCurrentUser(user: User): void {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser || typeof localStorage === 'undefined') return;
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
 
   private getCurrentUserFromStorage(): User | null {
-    if (!this.isBrowser) return null;
+    if (!this.isBrowser || typeof localStorage === 'undefined') return null;
     try {
       const userData = localStorage.getItem(this.USER_KEY);
       return userData ? JSON.parse(userData) : null;
