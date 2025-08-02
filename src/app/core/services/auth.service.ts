@@ -17,7 +17,7 @@ export class AuthService {
   private readonly USER_KEY = 'splitgroup_user';
   private isBrowser: boolean;
 
-  private currentUserSubject = new BehaviorSubject<User | null>(this.getCurrentUserFromStorage());
+  private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser$ = this.currentUserSubject.asObservable();
 
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -30,6 +30,7 @@ export class AuthService {
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+    this.currentUserSubject = new BehaviorSubject<User | null>(this.getCurrentUserFromStorage());
     this.initializeFromStorage();
   }
 
@@ -155,7 +156,6 @@ export class AuthService {
 
   private storeAuthData(response: LoginResponse): void {
     if (!this.isBrowser) return;
-    
     const user: User = {
       id: response.userId,
       name: response.name,
@@ -169,7 +169,6 @@ export class AuthService {
 
   private clearAuthData(): void {
     if (!this.isBrowser) return;
-    
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     this.currentUserSubject.next(null);
@@ -189,7 +188,6 @@ export class AuthService {
 
   private getCurrentUserFromStorage(): User | null {
     if (!this.isBrowser) return null;
-    
     try {
       const userData = localStorage.getItem(this.USER_KEY);
       return userData ? JSON.parse(userData) : null;
