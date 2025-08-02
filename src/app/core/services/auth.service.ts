@@ -15,7 +15,7 @@ export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'splitgroup_token';
   private readonly USER_KEY = 'splitgroup_user';
-  // private isBrowser: boolean;
+  private isBrowser: boolean;
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.getCurrentUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -29,7 +29,7 @@ export class AuthService {
     private snackBar: MatSnackBar,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
-    // this.isBrowser = isPlatformBrowser(platformId);
+    this.isBrowser = isPlatformBrowser(platformId);
     this.initializeFromStorage();
   }
 
@@ -129,7 +129,7 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    // if (!this.isBrowser) return null;
+    if (!this.isBrowser) return null;
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
@@ -154,6 +154,8 @@ export class AuthService {
   }
 
   private storeAuthData(response: LoginResponse): void {
+    if (!this.isBrowser) return;
+    
     const user: User = {
       id: response.userId,
       name: response.name,
@@ -166,6 +168,8 @@ export class AuthService {
   }
 
   private clearAuthData(): void {
+    if (!this.isBrowser) return;
+    
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     this.currentUserSubject.next(null);
@@ -173,15 +177,19 @@ export class AuthService {
   }
 
   private setToken(token: string): void {
+    if (!this.isBrowser) return;
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
   private updateCurrentUser(user: User): void {
+    if (!this.isBrowser) return;
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
 
   private getCurrentUserFromStorage(): User | null {
+    if (!this.isBrowser) return null;
+    
     try {
       const userData = localStorage.getItem(this.USER_KEY);
       return userData ? JSON.parse(userData) : null;
