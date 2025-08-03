@@ -174,7 +174,7 @@ import { User } from '../../../shared/models/user.model';
                 </div>
               </div>
               <div class="participant-amount">
-                <span class="payer-badge">Paid ${{ getFormattedAmount() }}</span>
+                <span class="payer-badge">Paid $ {{ getFormattedAmount() }}</span>
               </div>
             </div>
 
@@ -203,7 +203,7 @@ import { User } from '../../../shared/models/user.model';
                 <div class="participant-amount">
                   <!-- Equal Split - Show calculated amount -->
                   <div *ngIf="splitType === 'EQUAL'" class="calculated-amount">
-                    ${{ getEqualSplitAmount() }}
+                    $ {{ getEqualSplitAmount() }}
                   </div>
 
                   <!-- Exact Amount -->
@@ -238,7 +238,7 @@ import { User } from '../../../shared/models/user.model';
               <h4>Split Summary</h4>
               <div class="summary-item">
                 <span>Total Amount:</span>
-                <span class="amount">${{ getFormattedAmount() }}</span>
+                <span class="amount">$ {{ getFormattedAmount() }}</span>
               </div>
               <div class="summary-item">
                 <span>Number of People:</span>
@@ -246,12 +246,12 @@ import { User } from '../../../shared/models/user.model';
               </div>
               <div *ngIf="splitType === 'EQUAL'" class="summary-item">
                 <span>Amount per Person:</span>
-                <span class="amount">${{ getEqualSplitAmount() }}</span>
+                <span class="amount">$ {{ getEqualSplitAmount() }}</span>
               </div>
               <div *ngIf="splitType !== 'EQUAL'" class="summary-item">
                 <span>Remaining to Assign:</span>
                 <span class="amount" [class.error]="getRemainingAmount() !== 0">
-                  ${{ getRemainingAmount().toFixed(2) }}
+                  $ {{ getRemainingAmount().toFixed(2) }}
                 </span>
               </div>
             </div>

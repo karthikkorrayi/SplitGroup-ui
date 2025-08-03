@@ -110,7 +110,7 @@ import { Settlement, SettlementStatus } from '../../../shared/models/balance.mod
             <div class="stat-content">
               <mat-icon class="stat-icon">trending_up</mat-icon>
               <div class="stat-info">
-                <h3>${{ getTotalReceived().toFixed(2) }}</h3>
+                <h3>$ {{ getTotalReceived().toFixed(2) }}</h3>
                 <p>Total Received</p>
               </div>
             </div>
@@ -122,7 +122,7 @@ import { Settlement, SettlementStatus } from '../../../shared/models/balance.mod
             <div class="stat-content">
               <mat-icon class="stat-icon">trending_down</mat-icon>
               <div class="stat-info">
-                <h3>${{ getTotalPaid().toFixed(2) }}</h3>
+                <h3>$ {{ getTotalPaid().toFixed(2) }}</h3>
                 <p>Total Paid</p>
               </div>
             </div>

@@ -55,7 +55,7 @@ import { UserBalance, Balance } from '../../../shared/models/balance.model';
             <div class="summary-content">
               <mat-icon class="summary-icon">trending_up</mat-icon>
               <div class="summary-info">
-                <h3>\${{ userBalance.totalOwed.toFixed(2) }}</h3>
+                <h3>$ {{ userBalance.totalOwed.toFixed(2) }}</h3>
                 <p>You are owed</p>
                 <small>Total amount others owe you</small>
               </div>
@@ -66,7 +66,7 @@ import { UserBalance, Balance } from '../../../shared/models/balance.model';
             <div class="summary-content">
               <mat-icon class="summary-icon">trending_down</mat-icon>
               <div class="summary-info">
-                <h3>\${{ userBalance.totalOwing.toFixed(2) }}</h3>
+                <h3>$ {{ userBalance.totalOwing.toFixed(2) }}</h3>
                 <p>You owe</p>
                 <small>Total amount you owe others</small>
               </div>
@@ -77,7 +77,7 @@ import { UserBalance, Balance } from '../../../shared/models/balance.model';
             <div class="summary-content">
               <mat-icon class="summary-icon">account_balance</mat-icon>
               <div class="summary-info">
-                <h3>\${{ getAbs(userBalance.netBalance).toFixed(2) }}</h3>
+                <h3>$ {{ getAbs(userBalance.netBalance).toFixed(2) }}</h3>
                 <p>Net Balance</p>
                 <small>{{ getNetBalanceText() }}</small>
               </div>

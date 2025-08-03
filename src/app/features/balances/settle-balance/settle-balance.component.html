@@ -99,7 +99,7 @@
                 <mat-icon>{{ paymentDirection === 'paying' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 <span>
                   {{ paymentDirection === 'paying' ? 'You are paying' : 'You are receiving' }}
-                  <strong>${{ formattedSettlementAmountDisplay }}</strong>
+                  <strong>$ {{ formattedSettlementAmountDisplay }}</strong>
                   {{ paymentDirection === 'paying' ? 'to' : 'from' }}
                   <strong>{{ getSelectedUserName() }}</strong>
                 </span>
@@ -141,6 +141,7 @@
               <div class="suggestion-details">
                 <span class="suggestion-text">{{ suggestion.description }}</span>
                 <small class="suggestion-amount">${{ formatAmountForDisplay(suggestion.amount) }}</small>
+                <small class="suggestion-amount">$ {{ formatAmountForDisplay(suggestion.amount) }}</small>
               </div>
             </div>
             <button mat-stroked-button (click)="onQuickSettle(suggestion)">
