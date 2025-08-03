@@ -524,7 +524,7 @@ export class SettleBalanceComponent implements OnInit, OnDestroy {
 
   getFormattedSettlementAmount(): string {
     const amount = this.settlementForm.get('amount')?.value;
-    return amount ? amount.toFixed(2) : '0.00';
+    return parseFloat(amount || 0).toFixed(2);
   }
 
   private loadData(): void {

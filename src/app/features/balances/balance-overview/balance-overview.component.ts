@@ -77,7 +77,7 @@ import { UserBalance, Balance } from '../../../shared/models/balance.model';
             <div class="summary-content">
               <mat-icon class="summary-icon">account_balance</mat-icon>
               <div class="summary-info">
-                <h3>\${{ Math.abs(userBalance.netBalance).toFixed(2) }}</h3>
+                <h3>\${{ getAbs(userBalance.netBalance).toFixed(2) }}</h3>
                 <p>Net Balance</p>
                 <small>{{ getNetBalanceText() }}</small>
               </div>
@@ -502,6 +502,11 @@ export class BalanceOverviewComponent implements OnInit, OnDestroy {
   currentUserId: number = 0;
 
   private destroy$ = new Subject<void>();
+
+  // Expose Math functions to template
+  getAbs(value: number): number {
+    return Math.abs(value);
+  }
 
   constructor(
     private authService: AuthService,
