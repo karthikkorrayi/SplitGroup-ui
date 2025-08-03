@@ -135,7 +135,7 @@ import { User } from '../../../shared/models/user.model';
                     <mat-icon>{{ paymentDirection === 'paying' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                     <span>
                       {{ paymentDirection === 'paying' ? 'You are paying' : 'You are receiving' }}
-                      <strong>${{ settlementForm.get('amount')?.value?.toFixed(2) || '0.00' }}</strong>
+                      <strong>${{ getFormattedSettlementAmount() }}</strong>
                       {{ paymentDirection === 'paying' ? 'to' : 'from' }}
                       <strong>{{ getSelectedUserName() }}</strong>
                     </span>
