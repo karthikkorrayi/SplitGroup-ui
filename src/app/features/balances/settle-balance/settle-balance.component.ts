@@ -135,7 +135,7 @@ import { User } from '../../../shared/models/user.model';
                     <mat-icon>{{ paymentDirection === 'paying' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                     <span>
                       {{ paymentDirection === 'paying' ? 'You are paying' : 'You are receiving' }}
-                      <strong>${{ getFormattedSettlementAmount() }}</strong>
+                      <strong>${{ formattedSettlementAmountDisplay }}</strong>
                       {{ paymentDirection === 'paying' ? 'to' : 'from' }}
                       <strong>{{ getSelectedUserName() }}</strong>
                     </span>
@@ -176,7 +176,7 @@ import { User } from '../../../shared/models/user.model';
                   </div>
                   <div class="suggestion-details">
                     <span class="suggestion-text">{{ suggestion.description }}</span>
-                    <small class="suggestion-amount">${{ suggestion.amount.toFixed(2) }}</small>
+                    <small class="suggestion-amount">${{ formatAmountForDisplay(suggestion.amount) }}</small>
                   </div>
                 </div>
                 <button mat-stroked-button (click)="onQuickSettle(suggestion)">
@@ -496,6 +496,7 @@ export class SettleBalanceComponent implements OnInit, OnDestroy {
   saving = false;
 
   private destroy$ = new Subject<void>();
+  formattedSettlementAmountDisplay = '0.00';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -515,6 +516,11 @@ export class SettleBalanceComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadData();
+    
+    // Subscribe to amount changes to update formatted display
+    this.settlementForm.get('amount')?.valueChanges.subscribe(value => {
+      this.formattedSettlementAmountDisplay = parseFloat(value || 0).toFixed(2);
+    });
   }
 
   ngOnDestroy(): void {
@@ -525,6 +531,10 @@ export class SettleBalanceComponent implements OnInit, OnDestroy {
   getFormattedSettlementAmount(): string {
     const amount = this.settlementForm.get('amount')?.value;
     return parseFloat(amount || 0).toFixed(2);
+  }
+
+  formatAmountForDisplay(amount: number): string {
+    return amount.toFixed(2);
   }
 
   private loadData(): void {
