@@ -29,7 +29,156 @@ import { UserBalance, Balance } from '../../../shared/models/balance.model';
     MatChipsModule,
     MatMenuModule
   ],
-  templateUrl: './balance-overview.component.html',
+  template: `
+    <div class="balance-overview-container">
+      <div class="overview-header">
+        <div class="header-content">
+          <h1>Balance Overview</h1>
+          <p>{{ getNetBalanceText() }}</p>
+        </div>
+        <button mat-raised-button color="primary" (click)="onRefresh()">
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading your balances...</p>
+      </div>
+
+      <!-- Balance Summary -->
+      <div *ngIf="!loading && userBalance" class="balance-summary">
+        <div class="summary-cards">
+          <mat-card class="summary-card positive">
+            <div class="summary-content">
+              <mat-icon class="summary-icon">trending_up</mat-icon>
+              <div class="summary-info">
+                <h3>\${{ userBalance.totalOwed.toFixed(2) }}</h3>
+                <p>You are owed</p>
+                <small>Total amount others owe you</small>
+              </div>
+            </div>
+          </mat-card>
+
+          <mat-card class="summary-card negative">
+            <div class="summary-content">
+              <mat-icon class="summary-icon">trending_down</mat-icon>
+              <div class="summary-info">
+                <h3>\${{ userBalance.totalOwing.toFixed(2) }}</h3>
+                <p>You owe</p>
+                <small>Total amount you owe others</small>
+              </div>
+            </div>
+          </mat-card>
+
+          <mat-card class="summary-card" [ngClass]="userBalance.netBalance >= 0 ? 'positive' : 'negative'">
+            <div class="summary-content">
+              <mat-icon class="summary-icon">account_balance</mat-icon>
+              <div class="summary-info">
+                <h3>\${{ Math.abs(userBalance.netBalance).toFixed(2) }}</h3>
+                <p>Net Balance</p>
+                <small>{{ getNetBalanceText() }}</small>
+              </div>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- Individual Balances -->
+      <mat-card class="balances-card" *ngIf="!loading">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>people</mat-icon>
+            Individual Balances
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- Empty State -->
+          <div *ngIf="!userBalance || userBalance.balances.length === 0" class="empty-state">
+            <mat-icon class="empty-icon">account_balance_wallet</mat-icon>
+            <h3>No balances yet</h3>
+            <p>Start by creating an expense with friends to see your balances here.</p>
+            <button mat-raised-button color="primary" (click)="onCreateExpense()">
+              <mat-icon>add</mat-icon>
+              Create First Expense
+            </button>
+          </div>
+
+          <!-- Balance List -->
+          <div *ngIf="userBalance && userBalance.balances.length > 0">
+            <div *ngFor="let balance of userBalance.balances" class="balance-item">
+              <div class="balance-avatar">
+                {{ getUserInitials(balance) }}
+              </div>
+              <div class="balance-main">
+                <div class="balance-header">
+                  <span class="balance-name">{{ getOtherUserName(balance) }}</span>
+                  <span class="balance-amount" [ngClass]="getBalanceAmountClass(balance)">
+                    {{ formatBalanceAmount(balance) }}
+                  </span>
+                </div>
+                <div class="balance-description">{{ balance.description }}</div>
+                <div class="balance-meta">
+                  <mat-chip class="settled-chip" *ngIf="balance.isSettled">Settled</mat-chip>
+                  <mat-chip class="active-chip" *ngIf="!balance.isSettled">Active</mat-chip>
+                  <span class="balance-date">{{ formatDate(balance.lastUpdated) }}</span>
+                </div>
+              </div>
+              <div class="balance-actions">
+                <button mat-icon-button [matMenuTriggerFor]="balanceMenu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #balanceMenu="matMenu">
+                  <button mat-menu-item (click)="onSettleBalance(balance)" *ngIf="!balance.isSettled">
+                    <mat-icon>payment</mat-icon>
+                    <span>Settle Up</span>
+                  </button>
+                  <button mat-menu-item (click)="onViewBalanceDetails(balance)">
+                    <mat-icon>visibility</mat-icon>
+                    <span>View Details</span>
+                  </button>
+                  <button mat-menu-item (click)="onRemindUser(balance)" *ngIf="!balance.isSettled">
+                    <mat-icon>notifications</mat-icon>
+                    <span>Send Reminder</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Quick Actions -->
+      <mat-card class="actions-card" *ngIf="!loading">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>flash_on</mat-icon>
+            Quick Actions
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="action-buttons">
+            <button mat-raised-button color="primary" (click)="onCreateExpense()">
+              <mat-icon>add</mat-icon>
+              Add Expense
+            </button>
+            <button mat-stroked-button (click)="onSettleUp()">
+              <mat-icon>payment</mat-icon>
+              Settle Up
+            </button>
+            <button mat-stroked-button (click)="onViewHistory()">
+              <mat-icon>history</mat-icon>
+              View History
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  `,
   styles: [`
     .balance-overview-container {
       max-width: 1000px;

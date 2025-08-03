@@ -522,6 +522,11 @@ export class SettleBalanceComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  getFormattedSettlementAmount(): string {
+    const amount = this.settlementForm.get('amount')?.value;
+    return amount ? amount.toFixed(2) : '0.00';
+  }
+
   private loadData(): void {
     // Load available users and suggested settlements
     // For now, we'll use mock data
