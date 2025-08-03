@@ -26,6 +26,62 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'profile',
+    loadComponent: () => import('./features/profile/profile.component').then(c => c.ProfileComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'users',
+    children: [
+      {
+        path: 'search',
+        loadComponent: () => import('./features/users/user-search/user-search.component').then(c => c.UserSearchComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'search',
+        pathMatch: 'full'
+      }
+    ],
+    canActivate: [authGuard]
+  },
+  {
+    path: 'transactions',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/transactions/transaction-list/transaction-list.component').then(c => c.TransactionListComponent)
+      },
+      {
+        path: 'create',
+        loadComponent: () => import('./features/transactions/create-transaction/create-transaction.component').then(c => c.CreateTransactionComponent)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/transactions/transaction-detail/transaction-detail.component').then(c => c.TransactionDetailComponent)
+      }
+    ],
+    canActivate: [authGuard]
+  },
+  {
+    path: 'balances',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/balances/balance-overview/balance-overview.component').then(c => c.BalanceOverviewComponent)
+      },
+      {
+        path: 'settle',
+        loadComponent: () => import('./features/balances/settle-balance/settle-balance.component').then(c => c.SettleBalanceComponent)
+      },
+      {
+        path: 'settlements',
+        loadComponent: () => import('./features/balances/settlement-history/settlement-history.component').then(c => c.SettlementHistoryComponent)
+      }
+    ],
+    canActivate: [authGuard]
+  },
+  {
     path: '',
     redirectTo: '/auth/login',
     pathMatch: 'full'
