@@ -73,7 +73,7 @@ import { TransactionDetail, TransactionStatus } from '../../../shared/models/tra
             <div class="transaction-summary">
               <div class="summary-item">
                 <span class="label">Total Amount:</span>
-                <span class="value amount">${{ transaction.totalAmount.toFixed(2) }}</span>
+                <span class="value amount">$ {{ transaction.totalAmount.toFixed(2) }}</span>
               </div>
               <div class="summary-item">
                 <span class="label">Split Type:</span>
