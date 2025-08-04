@@ -615,7 +615,7 @@ export class CreateTransactionComponent implements OnInit, OnDestroy {
 
   private updateParticipantControls(): void {
     this.participantsArray.controls.forEach(control => {
-      const group = control as FormGroup;
+      const group = control as FormGroup<any>;
       
       // Remove existing amount/percentage controls
       if (group.contains('amount')) {
@@ -635,7 +635,7 @@ export class CreateTransactionComponent implements OnInit, OnDestroy {
   }
 
   onAddParticipant(): void {
-    const participantGroup = this.formBuilder.group({
+    const participantGroup: FormGroup<any> = this.formBuilder.group({
       userId: ['', [Validators.required]]
     });
 
