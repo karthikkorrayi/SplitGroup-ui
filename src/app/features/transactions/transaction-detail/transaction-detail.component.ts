@@ -114,7 +114,7 @@ import { TransactionDetail, TransactionStatus } from '../../../shared/models/tra
                       <span *ngIf="participant.userId === transaction.paidBy" class="payer-badge">(Paid)</span>
                     </span>
                     <span class="participant-amount">
-                      ${{ participant.amount?.toFixed(2) || '0.00' }}
+                      $ {{ formatParticipantAmount(participant.amount) }}
                       <span *ngIf="participant.percentage" class="percentage">
                         ({{ participant.percentage }}%)
                       </span>
@@ -155,7 +155,7 @@ import { TransactionDetail, TransactionStatus } from '../../../shared/models/tra
                 <div matLine class="settlement-info">
                   <div class="settlement-header">
                     <span class="settlement-description">{{ settlement.description }}</span>
-                    <span class="settlement-amount">${{ settlement.amount.toFixed(2) }}</span>
+                    <span class="settlement-amount">$ {{ settlement.amount.toFixed(2) }}</span>
                   </div>
                   
                   <div class="settlement-details">
@@ -740,5 +740,9 @@ export class TransactionDetailComponent implements OnInit, OnDestroy {
       horizontalPosition: 'end',
       verticalPosition: 'top'
     });
+  }
+
+  formatParticipantAmount(amount: number | undefined): string {
+    return amount?.toFixed(2) || '0.00';
   }
 }
