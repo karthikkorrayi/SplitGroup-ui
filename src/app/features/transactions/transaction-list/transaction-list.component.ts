@@ -16,6 +16,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -39,7 +40,8 @@ import { Transaction, TransactionStatus } from '../../../shared/models/transacti
     MatPaginatorModule,
     MatChipsModule,
     MatMenuModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule
   ],
   template: `
     <div class="transaction-list-container">
