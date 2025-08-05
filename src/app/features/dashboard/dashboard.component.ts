@@ -535,4 +535,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
   }
+
+  onCreateExpense(): void {
+    this.router.navigate(['/transactions/create']);
+  }
+
+  onViewAllTransactions(): void {
+    this.router.navigate(['/transactions']);
+  }
+
+  onViewAllBalances(): void {
+    this.router.navigate(['/balances']);
+  }
+
+  onSettleUp(): void {
+    this.router.navigate(['/balances/settle']);
+  }
 }

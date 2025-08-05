@@ -609,8 +609,13 @@ export class CreateTransactionComponent implements OnInit, OnDestroy {
   }
 
   private loadAvailableUsers(): void {
-    // For now, we'll use a mock list. In a real app, you might load recent users or friends
-    this.availableUsers = [];
+    // Load some mock users for demonstration
+    this.availableUsers = [
+      { id: 2, name: 'John Doe', email: 'john@example.com' },
+      { id: 3, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 4, name: 'Mike Johnson', email: 'mike@example.com' },
+      { id: 5, name: 'Sarah Wilson', email: 'sarah@example.com' }
+    ];
   }
 
   private updateParticipantControls(): void {

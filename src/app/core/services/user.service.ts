@@ -24,8 +24,19 @@ export class UserService {
 
   // search users by email
   searchUsersByEmail(email: string): Observable<SearchUsersResponse> {
-    return this.http.get<SearchUsersResponse>(`${this.API_URL}/search/email`, {
-      params: { q: email }
+    // Mock implementation for demonstration
+    const mockUsers = [
+      { id: 2, name: 'John Doe', email: 'john@example.com' },
+      { id: 3, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 4, name: 'Mike Johnson', email: 'mike@example.com' },
+      { id: 5, name: 'Sarah Wilson', email: 'sarah@example.com' }
+    ].filter(user => user.email.toLowerCase().includes(email.toLowerCase()));
+    
+    return new Observable(observer => {
+      setTimeout(() => {
+        observer.next({ users: mockUsers, total: mockUsers.length });
+        observer.complete();
+      }, 500);
     });
   }
 }

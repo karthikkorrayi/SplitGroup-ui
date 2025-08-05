@@ -44,6 +44,11 @@ export class SidebarComponent {
       route: '/dashboard'
     },
     {
+      label: 'Find Users',
+      icon: 'person_search',
+      route: '/users/search'
+    },
+    {
       label: 'Transactions',
       icon: 'receipt_long',
       route: '/transactions'

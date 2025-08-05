@@ -386,7 +386,19 @@ export class UserSearchComponent implements OnInit, OnDestroy {
 
           this.searching = true;
           this.lastSearchTerm = email;
-          return this.userService.searchUsersByEmail(email);
+          // Mock search results for demonstration
+          const mockResults = [
+            { id: 2, name: 'John Doe', email: 'john@example.com' },
+            { id: 3, name: 'Jane Smith', email: 'jane@example.com' },
+            { id: 4, name: 'Mike Johnson', email: 'mike@example.com' },
+            { id: 5, name: 'Sarah Wilson', email: 'sarah@example.com' }
+          ].filter(user => user.email.toLowerCase().includes(email.toLowerCase()));
+          
+          return new Promise(resolve => {
+            setTimeout(() => {
+              resolve({ users: mockResults, total: mockResults.length });
+            }, 500);
+          });
         }),
         takeUntil(this.destroy$)
       )
