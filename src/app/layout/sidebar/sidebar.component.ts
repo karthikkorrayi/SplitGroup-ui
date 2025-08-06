@@ -44,25 +44,24 @@ export class SidebarComponent {
       route: '/dashboard'
     },
     {
-      label: 'Find Users',
-      icon: 'person_search',
-      route: '/users/search'
+      label: 'Add Expense',
+      icon: 'add_circle',
+      route: '/expenses/add'
     },
     {
-      label: 'Transactions',
+      label: 'View Expenses',
       icon: 'receipt_long',
-      route: '/transactions'
+      route: '/expenses'
     },
     {
-      label: 'Balances',
-      icon: 'account_balance',
-      route: '/balances',
-      badge: 3
-    },
-    {
-      label: 'Groups',
+      label: 'View Groups',
       icon: 'group',
       route: '/groups'
+    },
+    {
+      label: 'Settle Expenses',
+      icon: 'payment',
+      route: '/settle'
     },
     {
       label: 'Reports',

@@ -2,7 +2,19 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { UserProfile, SearchUsersResponse } from '../../shared/models/user.model';
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface SearchUsersResponse {
+  users: User[];
+  total: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -12,31 +24,25 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  // get user profile by ID
-  getUserProfile(userId: number): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.API_URL}/profiles/${userId}`);
-  }
-
-  // update user profile
-  updateUserProfile(userId: number, profile: Partial<UserProfile>): Observable<UserProfile> {
-    return this.http.put<UserProfile>(`${this.API_URL}/profiles/${userId}`, profile);
-  }
-
-  // search users by email
+  // GET /api/users/search?email={email}
   searchUsersByEmail(email: string): Observable<SearchUsersResponse> {
-    // Mock implementation for demonstration
-    const mockUsers = [
-      { id: 2, name: 'John Doe', email: 'john@example.com' },
-      { id: 3, name: 'Jane Smith', email: 'jane@example.com' },
-      { id: 4, name: 'Mike Johnson', email: 'mike@example.com' },
-      { id: 5, name: 'Sarah Wilson', email: 'sarah@example.com' }
-    ].filter(user => user.email.toLowerCase().includes(email.toLowerCase()));
-    
-    return new Observable(observer => {
-      setTimeout(() => {
-        observer.next({ users: mockUsers, total: mockUsers.length });
-        observer.complete();
-      }, 500);
+    return this.http.get<SearchUsersResponse>(`${this.API_URL}/search`, {
+      params: { email }
     });
+  }
+
+  // GET /api/users/{id}
+  getUserById(id: number): Observable<User> {
+    return this.http.get<User>(`${this.API_URL}/${id}`);
+  }
+
+  // GET /api/users/profile
+  getCurrentUserProfile(): Observable<User> {
+    return this.http.get<User>(`${this.API_URL}/profile`);
+  }
+
+  // PUT /api/users/profile
+  updateProfile(profile: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.API_URL}/profile`, profile);
   }
 }

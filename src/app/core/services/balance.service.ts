@@ -2,12 +2,38 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { 
-  Balance, 
-  UserBalance, 
-  Settlement, 
-  CreateSettlementRequest 
-} from '../../shared/models/balance.model';
+
+export interface UserBalance {
+  userId: number;
+  userName: string;
+  totalOwed: number;    // Money others owe to this user
+  totalOwing: number;   // Money this user owes to others
+  netBalance: number;   // totalOwed - totalOwing
+}
+
+export interface BalanceSummary {
+  totalOwed: number;
+  totalOwing: number;
+  netBalance: number;
+  balances: UserBalance[];
+}
+
+export interface Settlement {
+  id: number;
+  fromUserId: number;
+  fromUserName: string;
+  toUserId: number;
+  toUserName: string;
+  amount: number;
+  description: string;
+  settledAt: Date;
+}
+
+export interface CreateSettlementRequest {
+  toUserId: number;
+  amount: number;
+  description?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -17,23 +43,23 @@ export class BalanceService {
 
   constructor(private http: HttpClient) {}
 
-  // get balance between two users
-  getBalanceBetweenUsers(userId1: number, userId2: number): Observable<Balance> {
-    return this.http.get<Balance>(`${this.API_URL}/${userId1}/${userId2}`);
+  // GET /api/balances/summary
+  getBalanceSummary(): Observable<BalanceSummary> {
+    return this.http.get<BalanceSummary>(`${this.API_URL}/summary`);
   }
 
-  // get user balances
-  getUserBalances(userId: number): Observable<UserBalance> {
-    return this.http.get<UserBalance>(`${this.API_URL}/user/${userId}`);
+  // GET /api/balances/with/{userId}
+  getBalanceWithUser(userId: number): Observable<UserBalance> {
+    return this.http.get<UserBalance>(`${this.API_URL}/with/${userId}`);
   }
 
-  // create a settlement
+  // POST /api/balances/settle
   createSettlement(settlement: CreateSettlementRequest): Observable<Settlement> {
     return this.http.post<Settlement>(`${this.API_URL}/settle`, settlement);
   }
 
-  // get user settlements
-  getUserSettlements(userId: number): Observable<Settlement[]> {
-    return this.http.get<Settlement[]>(`${this.API_URL}/settlements/user/${userId}`);
+  // GET /api/balances/settlements
+  getSettlements(): Observable<Settlement[]> {
+    return this.http.get<Settlement[]>(`${this.API_URL}/settlements`);
   }
 }

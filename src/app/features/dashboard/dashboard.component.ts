@@ -1,16 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject, takeUntil, Observable } from 'rxjs';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../core/services/auth.service';
+import { BalanceService, BalanceSummary } from '../../core/services/balance.service';
+import { ExpenseService, ExpenseListResponse } from '../../core/services/expense.service';
 import { User } from '../../shared/models/auth.model';
 
 @Component({
@@ -21,485 +21,566 @@ import { User } from '../../shared/models/auth.model';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule,
-    MatDividerModule,
     MatProgressSpinnerModule
   ],
   template: `
     <div class="dashboard-container">
-      <!-- Header -->
-      <mat-card class="header-card">
-        <mat-card-header>
-          <div class="header-content">
-            <div class="header-left">
-              <mat-icon class="app-icon">account_balance_wallet</mat-icon>
-              <div class="app-info">
-                <h1 class="app-title">SplitGroup</h1>
-                <p class="app-subtitle">Expense Management</p>
-              </div>
-            </div>
-            
-            <div class="header-right">
-              <!-- User Menu -->
-              <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
-                <div class="user-avatar">
-                  {{ getUserInitials() }}
+      <!-- Welcome Header -->
+      <div class="welcome-section">
+        <div class="welcome-content">
+          <h1>{{ getGreeting() }}, {{ getFirstName() }}! 👋</h1>
+          <p>Here's your expense overview</p>
+        </div>
+        <button mat-raised-button color="primary" (click)="onAddExpense()" class="add-expense-btn">
+          <mat-icon>add</mat-icon>
+          Add Expense
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading your dashboard...</p>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div *ngIf="!loading" class="dashboard-content">
+        
+        <!-- Balance Summary Cards -->
+        <div class="balance-cards">
+          <mat-card class="balance-card owed">
+            <mat-card-content>
+              <div class="card-content">
+                <div class="card-icon">
+                  <mat-icon>trending_up</mat-icon>
                 </div>
-                <span class="user-name">{{ (currentUser$ | async)?.name || 'User' }}</span>
-                <mat-icon>arrow_drop_down</mat-icon>
+                <div class="card-info">
+                  <h3>₹{{ balanceSummary?.totalOwed?.toFixed(2) || '0.00' }}</h3>
+                  <p>You are owed</p>
+                  <small>Money coming to you</small>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="balance-card owing">
+            <mat-card-content>
+              <div class="card-content">
+                <div class="card-icon">
+                  <mat-icon>trending_down</mat-icon>
+                </div>
+                <div class="card-info">
+                  <h3>₹{{ balanceSummary?.totalOwing?.toFixed(2) || '0.00' }}</h3>
+                  <p>You owe</p>
+                  <small>Money you need to pay</small>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="balance-card net" [ngClass]="getNetBalanceClass()">
+            <mat-card-content>
+              <div class="card-content">
+                <div class="card-icon">
+                  <mat-icon>account_balance</mat-icon>
+                </div>
+                <div class="card-info">
+                  <h3>₹{{ getNetBalanceAmount() }}</h3>
+                  <p>Net Balance</p>
+                  <small>{{ getNetBalanceText() }}</small>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Recent Activity -->
+        <mat-card class="activity-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>receipt_long</mat-icon>
+              Recent Expenses
+            </mat-card-title>
+            <div class="spacer"></div>
+            <button mat-button color="primary" (click)="onViewAllExpenses()">
+              View All
+            </button>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Empty State -->
+            <div *ngIf="recentExpenses.length === 0" class="empty-state">
+              <mat-icon class="empty-icon">receipt_long</mat-icon>
+              <h3>No expenses yet</h3>
+              <p>Start by adding your first expense!</p>
+              <button mat-raised-button color="primary" (click)="onAddExpense()">
+                <mat-icon>add</mat-icon>
+                Add First Expense
               </button>
             </div>
-          </div>
-        </mat-card-header>
-      </mat-card>
 
-      <!-- Welcome Section -->
-      <mat-card class="welcome-card">
-        <mat-card-content>
-          <div class="welcome-content">
-            <div class="welcome-text">
-              <h2>{{ getGreeting() }}, {{ getFirstName() }}! 👋</h2>
-              <p>Welcome to your expense management dashboard. Here's what's happening with your finances.</p>
+            <!-- Recent Expenses List -->
+            <div *ngIf="recentExpenses.length > 0" class="expenses-list">
+              <div *ngFor="let expense of recentExpenses" class="expense-item">
+                <div class="expense-icon">
+                  <mat-icon>{{ getCategoryIcon(expense.category) }}</mat-icon>
+                </div>
+                <div class="expense-details">
+                  <div class="expense-header">
+                    <span class="expense-description">{{ expense.description }}</span>
+                    <span class="expense-amount">₹{{ expense.amount.toFixed(2) }}</span>
+                  </div>
+                  <div class="expense-meta">
+                    <span class="expense-category">{{ expense.category }}</span>
+                    <span class="expense-date">{{ formatDate(expense.createdAt) }}</span>
+                  </div>
+                  <div class="expense-participants">
+                    <small>Paid by {{ expense.paidByName }} • {{ expense.participants.length + 1 }} people</small>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="welcome-actions">
-              <button mat-raised-button color="primary">
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Quick Actions -->
+        <mat-card class="actions-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>flash_on</mat-icon>
+              Quick Actions
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="actions-grid">
+              <button mat-stroked-button class="action-btn" (click)="onAddExpense()">
                 <mat-icon>add_circle</mat-icon>
-                Add Expense
+                <div class="action-content">
+                  <span class="action-title">Add Expense</span>
+                  <span class="action-subtitle">Split a new bill</span>
+                </div>
               </button>
-              <button mat-stroked-button color="accent">
-                <mat-icon>group_add</mat-icon>
-                Create Group
+
+              <button mat-stroked-button class="action-btn" (click)="onViewExpenses()">
+                <mat-icon>receipt_long</mat-icon>
+                <div class="action-content">
+                  <span class="action-title">View Expenses</span>
+                  <span class="action-subtitle">See all transactions</span>
+                </div>
               </button>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
 
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <mat-card class="stat-card positive">
-          <mat-card-content>
-            <div class="stat-content">
-              <mat-icon class="stat-icon">trending_up</mat-icon>
-              <div class="stat-info">
-                <h3>$0.00</h3>
-                <p>You are owed</p>
-                <small>Money coming to you</small>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+              <button mat-stroked-button class="action-btn" (click)="onViewGroups()">
+                <mat-icon>group</mat-icon>
+                <div class="action-content">
+                  <span class="action-title">View Groups</span>
+                  <span class="action-subtitle">Manage expense groups</span>
+                </div>
+              </button>
 
-        <mat-card class="stat-card negative">
-          <mat-card-content>
-            <div class="stat-content">
-              <mat-icon class="stat-icon">trending_down</mat-icon>
-              <div class="stat-info">
-                <h3>$0.00</h3>
-                <p>You owe</p>
-                <small>Money you need to pay</small>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="stat-card neutral">
-          <mat-card-content>
-            <div class="stat-content">
-              <mat-icon class="stat-icon">account_balance</mat-icon>
-              <div class="stat-info">
-                <h3>$0.00</h3>
-                <p>Net balance</p>
-                <small>Your overall position</small>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="stat-card accent">
-          <mat-card-content>
-            <div class="stat-content">
-              <mat-icon class="stat-icon">receipt_long</mat-icon>
-              <div class="stat-info">
-                <h3>0</h3>
-                <p>Transactions</p>
-                <small>This month</small>
-              </div>
+              <button mat-stroked-button class="action-btn" (click)="onSettleExpenses()">
+                <mat-icon>payment</mat-icon>
+                <div class="action-content">
+                  <span class="action-title">Settle Up</span>
+                  <span class="action-subtitle">Pay back debts</span>
+                </div>
+              </button>
             </div>
           </mat-card-content>
         </mat-card>
       </div>
-
-      <!-- Status Card -->
-      <mat-card class="status-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>checklist</mat-icon>
-            Authentication Status
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="status-list">
-            <div class="status-item completed">
-              <mat-icon>check_circle</mat-icon>
-              <span>✅ User authentication working</span>
-            </div>
-            <div class="status-item completed">
-              <mat-icon>check_circle</mat-icon>
-              <span>✅ JWT token management active</span>
-            </div>
-            <div class="status-item completed">
-              <mat-icon>check_circle</mat-icon>
-              <span>✅ Backend integration ready</span>
-            </div>
-            <div class="status-item completed">
-              <mat-icon>check_circle</mat-icon>
-              <span>✅ Dashboard fully functional</span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
     </div>
-
-    <!-- User Menu -->
-    <mat-menu #userMenu="matMenu" class="user-menu">
-      <div class="user-info">
-        <div class="user-avatar-large">
-          {{ getUserInitials() }}
-        </div>
-        <div class="user-details">
-          <div class="user-name">{{ (currentUser$ | async)?.name }}</div>
-          <div class="user-email">{{ (currentUser$ | async)?.email }}</div>
-        </div>
-      </div>
-      <mat-divider></mat-divider>
-      
-      <button mat-menu-item>
-        <mat-icon>person</mat-icon>
-        <span>Profile Settings</span>
-      </button>
-      
-      <button mat-menu-item>
-        <mat-icon>help</mat-icon>
-        <span>Help & Support</span>
-      </button>
-      
-      <mat-divider></mat-divider>
-      
-      <button mat-menu-item (click)="logout()" class="logout-btn">
-        <mat-icon>exit_to_app</mat-icon>
-        <span>Logout</span>
-      </button>
-    </mat-menu>
   `,
   styles: [`
     .dashboard-container {
-      padding: 1rem;
       max-width: 1200px;
       margin: 0 auto;
-      min-height: 100vh;
-      background-color: #f5f5f5;
+      padding: 1rem;
     }
 
-    .header-card {
-      margin-bottom: 1rem;
-    }
-
-    .header-content {
+    .welcome-section {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      width: 100%;
-    }
+      margin-bottom: 2rem;
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .app-icon {
-      font-size: 2.5rem;
-      width: 2.5rem;
-      height: 2.5rem;
-      color: #3f51b5;
-    }
-
-    .app-info {
-      .app-title {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #333;
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
       }
-      
-      .app-subtitle {
-        margin: 0;
-        color: #666;
-        font-size: 0.9rem;
+
+      .welcome-content {
+        h1 {
+          font-size: 2rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 0.5rem 0;
+        }
+
+        p {
+          color: #666;
+          font-size: 1.1rem;
+          margin: 0;
+        }
+      }
+
+      .add-expense-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+
+        @media (max-width: 768px) {
+          width: 100%;
+          justify-content: center;
+        }
       }
     }
 
-    .user-button {
+    .loading-container {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
-      background-color: rgba(63, 81, 181, 0.1);
-    }
-
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
+      height: 300px;
+      gap: 1rem;
+
+      p {
+        color: #666;
+        font-size: 1rem;
+      }
     }
 
-    .user-name {
-      font-weight: 500;
-      color: #333;
-    }
-
-    .welcome-card {
-      margin-bottom: 1rem;
-    }
-
-    .welcome-content {
+    .dashboard-content {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
       gap: 2rem;
     }
 
-    .welcome-text h2 {
-      margin: 0 0 0.5rem 0;
-      color: #333;
-      font-size: 1.5rem;
-    }
-
-    .welcome-text p {
-      margin: 0;
-      color: #666;
-    }
-
-    .welcome-actions {
-      display: flex;
-      gap: 1rem;
-      flex-shrink: 0;
-    }
-
-    .welcome-actions button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .stats-grid {
+    .balance-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1rem;
-      margin-bottom: 1rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .stat-card {
+    .balance-card {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-      
+
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       }
-      
-      &.positive {
+
+      &.owed {
         border-left: 4px solid #4caf50;
       }
-      
-      &.negative {
+
+      &.owing {
         border-left: 4px solid #f44336;
       }
-      
-      &.neutral {
-        border-left: 4px solid #2196f3;
+
+      &.net {
+        &.positive {
+          border-left: 4px solid #4caf50;
+        }
+        &.negative {
+          border-left: 4px solid #f44336;
+        }
+        &.neutral {
+          border-left: 4px solid #2196f3;
+        }
       }
-      
-      &.accent {
-        border-left: 4px solid #9c27b0;
+
+      .card-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .card-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          mat-icon {
+            font-size: 2rem;
+            width: 2rem;
+            height: 2rem;
+          }
+        }
+
+        .card-info {
+          flex: 1;
+
+          h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 0.25rem 0;
+          }
+
+          p {
+            color: #666;
+            font-weight: 500;
+            margin: 0 0 0.25rem 0;
+          }
+
+          small {
+            color: #999;
+            font-size: 0.85rem;
+          }
+        }
+      }
+
+      &.owed .card-icon {
+        background-color: rgba(76, 175, 80, 0.1);
+        mat-icon { color: #4caf50; }
+      }
+
+      &.owing .card-icon {
+        background-color: rgba(244, 67, 54, 0.1);
+        mat-icon { color: #f44336; }
+      }
+
+      &.net .card-icon {
+        background-color: rgba(33, 150, 243, 0.1);
+        mat-icon { color: #2196f3; }
+      }
+
+      &.net.positive .card-icon {
+        background-color: rgba(76, 175, 80, 0.1);
+        mat-icon { color: #4caf50; }
+      }
+
+      &.net.negative .card-icon {
+        background-color: rgba(244, 67, 54, 0.1);
+        mat-icon { color: #f44336; }
       }
     }
 
-    .stat-content {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+    .activity-card, .actions-card {
+      mat-card-header {
+        display: flex;
+        align-items: center;
 
-    .stat-icon {
-      font-size: 2.5rem;
-      width: 2.5rem;
-      height: 2.5rem;
-    }
-
-    .positive .stat-icon { color: #4caf50; }
-    .negative .stat-icon { color: #f44336; }
-    .neutral .stat-icon { color: #2196f3; }
-    .accent .stat-icon { color: #9c27b0; }
-
-    .stat-info h3 {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .stat-info p {
-      margin: 0.25rem 0;
-      color: #666;
-      font-weight: 500;
-    }
-
-    .stat-info small {
-      color: #999;
-      font-size: 0.8rem;
-    }
-
-    .status-card {
-      margin-bottom: 1rem;
-    }
-
-    .status-card mat-card-title {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .status-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .status-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      
-      &.completed {
-        color: #4caf50;
-        
-        mat-icon {
-          color: #4caf50;
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 1.25rem;
+          font-weight: 600;
         }
       }
     }
 
-    // User Menu Styles
-    .user-menu {
-      min-width: 280px;
-    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-    }
-
-    .user-avatar-large {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 600;
-      font-size: 1.1rem;
-      margin-right: 1rem;
-    }
-
-    .user-details {
-      .user-name {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 0.25rem;
+      .empty-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: #ccc;
+        margin-bottom: 1rem;
       }
-      
-      .user-email {
+
+      h3 {
         color: #666;
-        font-size: 0.9rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+      }
+
+      p {
+        color: #999;
+        margin: 0 0 2rem 0;
+      }
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 auto;
       }
     }
 
-    .logout-btn {
-      color: #f44336 !important;
-      
+    .expenses-list {
+      .expense-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .expense-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background-color: rgba(63, 81, 181, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          mat-icon {
+            color: #3f51b5;
+            font-size: 1.5rem;
+          }
+        }
+
+        .expense-details {
+          flex: 1;
+          min-width: 0;
+
+          .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+
+            .expense-description {
+              font-weight: 500;
+              color: #333;
+              font-size: 1rem;
+            }
+
+            .expense-amount {
+              font-weight: 600;
+              color: #3f51b5;
+              font-size: 1.1rem;
+            }
+          }
+
+          .expense-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.25rem;
+
+            .expense-category {
+              color: #666;
+              font-size: 0.9rem;
+              font-weight: 500;
+            }
+
+            .expense-date {
+              color: #999;
+              font-size: 0.9rem;
+            }
+          }
+
+          .expense-participants {
+            small {
+              color: #666;
+              font-size: 0.85rem;
+            }
+          }
+        }
+      }
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      height: auto;
+      gap: 1rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: rgba(63, 81, 181, 0.04);
+        border-color: #3f51b5;
+        transform: translateY(-1px);
+      }
+
       mat-icon {
-        color: #f44336;
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+        color: #3f51b5;
+      }
+
+      .action-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+
+        .action-title {
+          font-weight: 600;
+          color: #333;
+        }
+
+        .action-subtitle {
+          font-size: 0.85rem;
+          color: #666;
+          text-align: center;
+        }
       }
     }
 
-    // Responsive Design
     @media (max-width: 768px) {
       .dashboard-container {
         padding: 0.5rem;
       }
-      
-      .header-content {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
+
+      .welcome-section .welcome-content h1 {
+        font-size: 1.5rem;
       }
-      
-      .welcome-content {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
-      
-      .welcome-actions {
-        width: 100%;
-        
-        button {
-          flex: 1;
+
+      .expenses-list .expense-item {
+        .expense-details .expense-header {
+          flex-direction: column;
+          gap: 0.25rem;
         }
-      }
-      
-      .stats-grid {
-        grid-template-columns: 1fr;
       }
     }
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  currentUser$: Observable<User | null>;
+  currentUser: User | null = null;
+  balanceSummary: BalanceSummary | null = null;
+  recentExpenses: any[] = [];
+  loading = true;
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
+    private balanceService: BalanceService,
+    private expenseService: ExpenseService,
     private router: Router
-  ) {
-    // Initialize observable after authService is available
-    this.currentUser$ = this.authService.currentUser$;
-  }
+  ) {}
 
   ngOnInit(): void {
-    // Fetch fresh user data when dashboard loads
-    this.authService.getCurrentUser()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (user) => {
-          console.log('Dashboard loaded for user:', user);
-        },
-        error: (error) => {
-          console.error('Failed to load user data:', error);
-        }
-      });
+    this.currentUser = this.authService.getCurrentUserValue();
+    this.loadDashboardData();
   }
 
   ngOnDestroy(): void {
@@ -507,26 +588,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  logout(): void {
-    this.authService.logout();
-  }
-
-  getUserInitials(): string {
-    const user = this.authService.getCurrentUserValue();
-    if (!user?.name) return 'U';
-    
-    const names = user.name.split(' ');
-    if (names.length >= 2) {
-      return names[0][0] + names[1][0];
-    }
-    return names[0][0];
-  }
-
-  getFirstName(): string {
-    const user = this.authService.getCurrentUserValue();
-    if (!user?.name) return 'User';
-    
-    return user.name.split(' ')[0];
+  private loadDashboardData(): void {
+    forkJoin({
+      balances: this.balanceService.getBalanceSummary(),
+      expenses: this.expenseService.getUserExpenses(0, 5)
+    }).pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data) => {
+        this.balanceSummary = data.balances;
+        this.recentExpenses = data.expenses.expenses || [];
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load dashboard data:', error);
+        this.loading = false;
+        // Set default values on error
+        this.balanceSummary = {
+          totalOwed: 0,
+          totalOwing: 0,
+          netBalance: 0,
+          balances: []
+        };
+        this.recentExpenses = [];
+      }
+    });
   }
 
   getGreeting(): string {
@@ -536,19 +621,69 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'Good evening';
   }
 
-  onCreateExpense(): void {
-    this.router.navigate(['/transactions/create']);
+  getFirstName(): string {
+    return this.currentUser?.name?.split(' ')[0] || 'User';
   }
 
-  onViewAllTransactions(): void {
-    this.router.navigate(['/transactions']);
+  getNetBalanceAmount(): string {
+    const netBalance = this.balanceSummary?.netBalance || 0;
+    return Math.abs(netBalance).toFixed(2);
   }
 
-  onViewAllBalances(): void {
-    this.router.navigate(['/balances']);
+  getNetBalanceClass(): string {
+    const netBalance = this.balanceSummary?.netBalance || 0;
+    if (netBalance > 0) return 'positive';
+    if (netBalance < 0) return 'negative';
+    return 'neutral';
   }
 
-  onSettleUp(): void {
-    this.router.navigate(['/balances/settle']);
+  getNetBalanceText(): string {
+    const netBalance = this.balanceSummary?.netBalance || 0;
+    if (netBalance > 0) return 'You are owed overall';
+    if (netBalance < 0) return 'You owe overall';
+    return 'You are settled up';
+  }
+
+  getCategoryIcon(category: string): string {
+    const icons: { [key: string]: string } = {
+      'Food': 'restaurant',
+      'Transportation': 'directions_car',
+      'Entertainment': 'movie',
+      'Shopping': 'shopping_bag',
+      'Utilities': 'flash_on',
+      'Travel': 'flight',
+      'Healthcare': 'local_hospital',
+      'Other': 'receipt'
+    };
+    return icons[category] || 'receipt';
+  }
+
+  formatDate(date: Date | string): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  // Navigation methods
+  onAddExpense(): void {
+    this.router.navigate(['/expenses/add']);
+  }
+
+  onViewAllExpenses(): void {
+    this.router.navigate(['/expenses']);
+  }
+
+  onViewExpenses(): void {
+    this.router.navigate(['/expenses']);
+  }
+
+  onViewGroups(): void {
+    this.router.navigate(['/groups']);
+  }
+
+  onSettleExpenses(): void {
+    this.router.navigate(['/settle']);
   }
 }
