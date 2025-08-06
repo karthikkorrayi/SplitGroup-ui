@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -381,7 +381,7 @@ export class UserSearchComponent implements OnInit, OnDestroy {
           if (!email || email.length < 3) {
             this.searchResults = [];
             this.searchPerformed = false;
-            return [];
+            return of({ users: [], total: 0 });
           }
 
           this.searching = true;
