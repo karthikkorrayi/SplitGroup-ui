@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 
 import { UserService } from '../../../core/services/user.service';
-import { User } from '../../../shared/models/user.model';
+import { User, SearchUsersResponse } from '../../../shared/models/user.model';
 
 @Component({
   selector: 'app-user-search',
@@ -394,7 +394,7 @@ export class UserSearchComponent implements OnInit, OnDestroy {
             { id: 5, name: 'Sarah Wilson', email: 'sarah@example.com' }
           ].filter(user => user.email.toLowerCase().includes(email.toLowerCase()));
           
-          return new Promise(resolve => {
+          return new Promise<SearchUsersResponse>(resolve => {
             setTimeout(() => {
               resolve({ users: mockResults, total: mockResults.length });
             }, 500);
