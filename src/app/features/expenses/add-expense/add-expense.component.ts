@@ -421,6 +421,56 @@ import { GroupService, Group } from '../../../core/services/group.service';
       }
     }
 
+    .search-error {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #f44336;
+      padding: 0.5rem;
+
+      mat-icon {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+
+    .selected-user {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      position: relative;
+      padding: 0.75rem;
+      background-color: #e8f5e8;
+      border-radius: 8px;
+      border: 1px solid #4caf50;
+
+      .selected-user-name {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .selected-user-email {
+        color: #666;
+        font-size: 0.85rem;
+      }
+
+      .clear-user-btn {
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+        width: 24px;
+        height: 24px;
+        color: #666;
+
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+
     .add-participant-btn {
       width: 100%;
       padding: 1rem;
