@@ -17,6 +17,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { User } from '../../shared/models/auth.model';
 import { UserProfile } from '../../shared/models/user.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-profile',
@@ -361,11 +362,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.userService.getUserProfile(currentUser.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (profile) => {
+        next: (profile: UserProfile) => {
           this.populateForm(profile);
           this.loading = false;
         },
-        error: (error) => {
+        error: (error: HttpErrorResponse) => {
           console.error('Failed to load profile:', error);
           // Fallback to current user data
           this.populateFormFromCurrentUser(currentUser);
@@ -409,7 +410,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.userService.updateUserProfile(currentUser.id, profileData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (updatedProfile) => {
+          next: (updatedProfile: UserProfile) => {
             this.saving = false;
             this.showMessage('Profile updated successfully!', 'success-snackbar');
             
@@ -418,7 +419,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
               this.authService.getCurrentUser().subscribe();
             }
           },
-          error: (error) => {
+          error: (error: HttpErrorResponse) => {
             this.saving = false;
             console.error('Failed to update profile:', error);
             this.showMessage('Failed to update profile. Please try again.', 'error-snackbar');
