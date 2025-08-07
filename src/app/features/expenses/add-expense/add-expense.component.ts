@@ -509,6 +509,8 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
   userGroups: Group[] = [];
   searchResults: User[] = [];
   saving = false;
+  searchLoading = false;
+  searchError = '';
 
   private destroy$ = new Subject<void>();
 
@@ -558,35 +560,35 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
   }
 
   private setupUserSearch(): void {
-    // Setup search for each participant
-    this.participantsArray.controls.forEach((control, index) => {
-      const emailControl = control.get('userEmail');
-      if (emailControl) {
-        emailControl.valueChanges
-          .pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            takeUntil(this.destroy$)
-          )
-          .subscribe(email => {
-            if (email && email.length >= 3) {
-              this.searchUsers(email);
-            }
-          });
-      }
-    });
+    // Initial setup - will be called for each new participant
   }
 
-  private searchUsers(email: string): void {
-    this.userService.searchUsersByEmail(email)
+  private searchUsers(query: string): void {
+    if (!query || query.length < 2) {
+      this.searchResults = [];
+      this.searchError = '';
+      return;
+    }
+
+    this.searchLoading = true;
+    this.searchError = '';
+    
+    this.userService.searchUsers(query)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+          this.searchLoading = false;
           this.searchResults = response.users;
+          
+          if (response.users.length === 0) {
+            this.searchError = 'No users found. Please check if the user is registered.';
+          }
         },
         error: (error) => {
+          this.searchLoading = false;
           console.error('Search failed:', error);
           this.searchResults = [];
+          this.searchError = 'Failed to search users. Please try again.';
         }
       });
   }
