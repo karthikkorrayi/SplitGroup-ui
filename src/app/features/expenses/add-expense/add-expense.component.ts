@@ -17,7 +17,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { ExpenseService, CreateExpenseRequest } from '../../../core/services/expense.service';
-import { UserService, User } from '../../../core/services/user.service';
+import { UserService } from '../../../core/services/user.service';
+import { User } from '../../../shared/models/user.model';
 import { GroupService, Group } from '../../../core/services/group.service';
 
 @Component({
