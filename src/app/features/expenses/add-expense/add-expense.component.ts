@@ -151,12 +151,13 @@ import { GroupService, Group } from '../../../core/services/group.service';
                     {{ getParticipantInitials(participant.get('userId')?.value) }}
                   </div>
                   <div class="participant-details">
-                    <mat-form-field appearance="outline" class="participant-select">
+                    <!-- Show search field if no user selected -->
+                    <mat-form-field *ngIf="!isUserSelected(i)" appearance="outline" class="participant-select">
                       <mat-label>Search by email</mat-label>
                       <input matInput 
                              formControlName="userEmail"
                              [matAutocomplete]="auto"
-                             placeholder="Enter email to search">
+                             placeholder="Enter email or name to search">
                       <mat-autocomplete #auto="matAutocomplete" 
                                         (optionSelected)="onUserSelected($event, i)">
                         <mat-option *ngFor="let user of searchResults" [value]="user.email">
@@ -171,7 +172,21 @@ import { GroupService, Group } from '../../../core/services/group.service';
                           </div>
                         </mat-option>
                       </mat-autocomplete>
+                      <mat-error *ngIf="searchError">
+                        {{ searchError }}
+                      </mat-error>
                     </mat-form-field>
+                    
+                    <!-- Show selected user if user is selected -->
+                    <div *ngIf="isUserSelected(i)" class="selected-user">
+                      <div class="selected-user-info">
+                        <span class="selected-user-name">{{ getSelectedUserName(i) }}</span>
+                        <span class="selected-user-email">{{ getSelectedUserEmail(i) }}</span>
+                      </div>
+                      <button mat-icon-button (click)="onClearUser(i)" class="clear-user-btn" type="button">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -437,31 +452,37 @@ import { GroupService, Group } from '../../../core/services/group.service';
 
     .selected-user {
       display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      justify-content: space-between;
+      align-items: center;
       position: relative;
       padding: 0.75rem;
       background-color: #e8f5e8;
       border-radius: 8px;
       border: 1px solid #4caf50;
+      width: 100%;
 
-      .selected-user-name {
-        font-weight: 500;
-        color: #333;
-      }
+      .selected-user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
 
-      .selected-user-email {
-        color: #666;
-        font-size: 0.85rem;
+        .selected-user-name {
+          font-weight: 500;
+          color: #333;
+        }
+
+        .selected-user-email {
+          color: #666;
+          font-size: 0.85rem;
+        }
       }
 
       .clear-user-btn {
-        position: absolute;
-        top: 0.25rem;
-        right: 0.25rem;
         width: 24px;
         height: 24px;
         color: #666;
+        flex-shrink: 0;
 
         mat-icon {
           font-size: 1rem;
@@ -610,7 +631,32 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
   }
 
   private setupUserSearch(): void {
-    // Initial setup - will be called for each new participant
+    // Setup search for existing participants
+    this.participantsArray.controls.forEach((control, index) => {
+      this.setupSearchForParticipant(control as FormGroup, index);
+    });
+  }
+
+  private setupSearchForParticipant(participantGroup: FormGroup, index: number): void {
+    participantGroup.get('userEmail')?.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(email => {
+        if (email && email.length >= 2) {
+          this.searchUsers(email);
+        } else {
+          this.searchResults = [];
+          this.searchError = '';
+          // Clear user selection if email is cleared
+          participantGroup.patchValue({
+            userId: '',
+            userName: ''
+          });
+        }
+      });
   }
 
   private searchUsers(query: string): void {
@@ -628,17 +674,19 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.searchLoading = false;
-          this.searchResults = response.users;
+          this.searchResults = response.users || [];
           
-          if (response.users.length === 0) {
-            this.searchError = 'No users found. Please check if the user is registered.';
+          if (this.searchResults.length === 0) {
+            this.searchError = 'User not found or not registered with SplitGroup.';
+          } else {
+            this.searchError = '';
           }
         },
         error: (error) => {
           this.searchLoading = false;
           console.error('Search failed:', error);
           this.searchResults = [];
-          this.searchError = 'Failed to search users. Please try again.';
+          this.searchError = 'Failed to search users. Please check your connection and try again.';
         }
       });
   }
@@ -646,22 +694,14 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
   onAddParticipant(): void {
     const participantGroup = this.formBuilder.group({
       userId: ['', [Validators.required]],
+      userName: [''],
       userEmail: ['', [Validators.required]],
       amount: ['', [Validators.required, Validators.min(0.01)]]
     });
 
-    // Setup search for new participant
-    participantGroup.get('userEmail')?.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(email => {
-        if (email && email.length >= 3) {
-          this.searchUsers(email);
-        }
-      });
+    // Setup search for this new participant
+    const newIndex = this.participantsArray.length;
+    this.setupSearchForParticipant(participantGroup, newIndex);
 
     this.participantsArray.push(participantGroup);
   }
@@ -676,9 +716,42 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
       const participantGroup = this.participantsArray.at(index) as FormGroup;
       participantGroup.patchValue({
         userId: selectedUser.id,
+        userName: selectedUser.name,
         userEmail: selectedUser.email
       });
+      
+      // Clear search results and error after selection
+      this.searchResults = [];
+      this.searchError = '';
+      
+      console.log('User selected:', selectedUser);
     }
+  }
+
+  onClearUser(index: number): void {
+    const participantGroup = this.participantsArray.at(index) as FormGroup;
+    participantGroup.patchValue({
+      userId: '',
+      userName: '',
+      userEmail: ''
+    });
+    this.searchResults = [];
+    this.searchError = '';
+  }
+
+  isUserSelected(index: number): boolean {
+    const participantGroup = this.participantsArray.at(index) as FormGroup;
+    return !!participantGroup.get('userId')?.value;
+  }
+
+  getSelectedUserName(index: number): string {
+    const participantGroup = this.participantsArray.at(index) as FormGroup;
+    return participantGroup.get('userName')?.value || '';
+  }
+
+  getSelectedUserEmail(index: number): string {
+    const participantGroup = this.participantsArray.at(index) as FormGroup;
+    return participantGroup.get('userEmail')?.value || '';
   }
 
   getCurrentUserName(): string {
@@ -699,8 +772,12 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
 
   getParticipantInitials(userId: number): string {
     if (!userId) return 'U';
-    const user = this.searchResults.find(u => u.id === userId);
-    return this.getUserInitials(user?.name || '');
+    // Find user name from the form control
+    const participant = this.participantsArray.controls.find(control => 
+      control.get('userId')?.value === userId
+    );
+    const userName = participant?.get('userName')?.value || '';
+    return this.getUserInitials(userName);
   }
 
   getUserInitials(name: string): string {
@@ -733,7 +810,17 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
   }
 
   isValidSplit(): boolean {
+    // Check if we have participants
     if (this.participantsArray.length === 0) return false;
+    
+    // Check if all participants have valid users selected
+    const allUsersSelected = this.participantsArray.controls.every(control => 
+      control.get('userId')?.value && control.get('amount')?.value > 0
+    );
+    
+    if (!allUsersSelected) return false;
+    
+    // Check if amounts are properly distributed
     return Math.abs(this.getRemainingAmount()) < 0.01; // Allow for small rounding differences
   }
 
