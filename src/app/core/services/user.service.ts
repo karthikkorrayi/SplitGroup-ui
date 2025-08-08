@@ -9,7 +9,7 @@ import { User, UserProfile, SearchUsersResponse } from '../../shared/models/user
   providedIn: 'root'
 })
 export class UserService {
-  private readonly API_URL = 'http://localhost:8082/api/users'; // User microservice
+  private readonly API_URL = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) {}
 
