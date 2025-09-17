@@ -16,7 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { ExpenseService, CreateExpenseRequest } from '../../../core/services/expense.service';
+import { TransactionService, CreateTransactionRequest } from '../../../core/services/transaction.service';
 import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../shared/models/user.model';
 import { GroupService, Group } from '../../../core/services/group.service';
@@ -588,7 +588,7 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private expenseService: ExpenseService,
+    private transactionService: TransactionService,
     private userService: UserService,
     private groupService: GroupService,
     private router: Router,
@@ -834,26 +834,25 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
         amount: parseFloat(p.amount)
       }));
 
-      const expenseRequest: CreateExpenseRequest = {
+      const transactionRequest: CreateTransactionRequest = {
         description: formValue.description,
         amount: parseFloat(formValue.amount),
         category: formValue.category,
-        groupId: formValue.groupId,
         participants: participants
       };
 
-      this.expenseService.createExpense(expenseRequest)
+      this.transactionService.createTransaction(transactionRequest)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (expense) => {
+          next: (transaction) => {
             this.saving = false;
-            this.showMessage('Expense created successfully!', 'success-snackbar');
-            this.router.navigate(['/dashboard']);
+            this.showMessage('Transaction created successfully!', 'success-snackbar');
+            this.router.navigate(['/transactions']);
           },
           error: (error) => {
             this.saving = false;
-            console.error('Failed to create expense:', error);
-            this.showMessage('Failed to create expense. Please try again.', 'error-snackbar');
+            console.error('Failed to create transaction:', error);
+            this.showMessage(error.message || 'Failed to create transaction. Please try again.', 'error-snackbar');
           }
         });
     }

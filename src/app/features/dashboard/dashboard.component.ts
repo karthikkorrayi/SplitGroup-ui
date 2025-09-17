@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../core/services/auth.service';
 import { BalanceService, BalanceSummary } from '../../core/services/balance.service';
-import { ExpenseService, ExpenseListResponse } from '../../core/services/expense.service';
+import { TransactionService, Transaction } from '../../core/services/transaction.service';
 import { User } from '../../shared/models/auth.model';
 
 @Component({
@@ -109,33 +109,33 @@ import { User } from '../../shared/models/auth.model';
 
           <mat-card-content>
             <!-- Empty State -->
-            <div *ngIf="recentExpenses.length === 0" class="empty-state">
+            <div *ngIf="recentTransactions.length === 0" class="empty-state">
               <mat-icon class="empty-icon">receipt_long</mat-icon>
-              <h3>No expenses yet</h3>
-              <p>Start by adding your first expense!</p>
+              <h3>No transactions yet</h3>
+              <p>Start by adding your first transaction!</p>
               <button mat-raised-button color="primary" (click)="onAddExpense()">
                 <mat-icon>add</mat-icon>
-                Add First Expense
+                Add First Transaction
               </button>
             </div>
 
-            <!-- Recent Expenses List -->
-            <div *ngIf="recentExpenses.length > 0" class="expenses-list">
-              <div *ngFor="let expense of recentExpenses" class="expense-item">
+            <!-- Recent Transactions List -->
+            <div *ngIf="recentTransactions.length > 0" class="transactions-list">
+              <div *ngFor="let transaction of recentTransactions" class="transaction-item">
                 <div class="expense-icon">
-                  <mat-icon>{{ getCategoryIcon(expense.category) }}</mat-icon>
+                  <mat-icon>{{ getCategoryIcon(transaction.category) }}</mat-icon>
                 </div>
                 <div class="expense-details">
                   <div class="expense-header">
-                    <span class="expense-description">{{ expense.description }}</span>
-                    <span class="expense-amount">₹{{ expense.amount.toFixed(2) }}</span>
+                    <span class="expense-description">{{ transaction.description }}</span>
+                    <span class="expense-amount">₹{{ transaction.amount.toFixed(2) }}</span>
                   </div>
                   <div class="expense-meta">
-                    <span class="expense-category">{{ expense.category }}</span>
-                    <span class="expense-date">{{ formatDate(expense.createdAt) }}</span>
+                    <span class="expense-category">{{ transaction.category }}</span>
+                    <span class="expense-date">{{ formatDate(transaction.createdAt) }}</span>
                   </div>
                   <div class="expense-participants">
-                    <small>Paid by {{ expense.paidByName }} • {{ expense.participants.length + 1 }} people</small>
+                    <small>Paid by {{ transaction.paidByName }} • {{ transaction.participants.length + 1 }} people</small>
                   </div>
                 </div>
               </div>
@@ -413,7 +413,9 @@ import { User } from '../../shared/models/auth.model';
     }
 
     .expenses-list {
+    .transactions-list {
       .expense-item {
+      .transaction-item {
         display: flex;
         align-items: flex-start;
         gap: 1rem;
@@ -566,7 +568,7 @@ import { User } from '../../shared/models/auth.model';
 export class DashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   balanceSummary: BalanceSummary | null = null;
-  recentExpenses: any[] = [];
+  recentTransactions: Transaction[] = [];
   loading = true;
 
   private destroy$ = new Subject<void>();
@@ -574,7 +576,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private balanceService: BalanceService,
-    private expenseService: ExpenseService,
+    private transactionService: TransactionService,
     private router: Router
   ) {}
 
@@ -591,12 +593,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadDashboardData(): void {
     forkJoin({
       balances: this.balanceService.getBalanceSummary(),
-      expenses: this.expenseService.getUserExpenses(0, 5)
+      transactions: this.transactionService.getRecentTransactions(5)
     }).pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (data) => {
         this.balanceSummary = data.balances;
-        this.recentExpenses = data.expenses.expenses || [];
+        this.recentTransactions = data.transactions || [];
         this.loading = false;
       },
       error: (error) => {
@@ -609,7 +611,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           netBalance: 0,
           balances: []
         };
-        this.recentExpenses = [];
+        this.recentTransactions = [];
       }
     });
   }
@@ -672,11 +674,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   onViewAllExpenses(): void {
-    this.router.navigate(['/expenses']);
+    this.router.navigate(['/transactions']);
   }
 
   onViewExpenses(): void {
-    this.router.navigate(['/expenses']);
+    this.router.navigate(['/transactions']);
   }
 
   onViewGroups(): void {

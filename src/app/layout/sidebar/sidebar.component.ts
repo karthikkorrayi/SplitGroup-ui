@@ -49,9 +49,9 @@ export class SidebarComponent {
       route: '/expenses/add'
     },
     {
-      label: 'View Expenses',
+      label: 'Transaction History',
       icon: 'receipt_long',
-      route: '/expenses'
+      route: '/transactions'
     },
     {
       label: 'View Groups',

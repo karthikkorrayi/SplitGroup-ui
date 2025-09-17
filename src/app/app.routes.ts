@@ -45,6 +45,23 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'transactions',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/transactions/transaction-history/transaction-history.component').then(c => c.TransactionHistoryComponent)
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./features/transactions/transaction-details/transaction-details.component').then(c => c.TransactionDetailsComponent)
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () => import('./features/transactions/edit-transaction/edit-transaction.component').then(c => c.EditTransactionComponent)
+          }
+        ]
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.component').then(c => c.ProfileComponent)
       },
