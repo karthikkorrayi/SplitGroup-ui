@@ -412,9 +412,7 @@ import { User } from '../../shared/models/auth.model';
       }
     }
 
-    .expenses-list {
     .transactions-list {
-      .expense-item {
       .transaction-item {
         display: flex;
         align-items: flex-start;
@@ -426,7 +424,7 @@ import { User } from '../../shared/models/auth.model';
           border-bottom: none;
         }
 
-        .expense-icon {
+        .transaction-icon {
           width: 48px;
           height: 48px;
           border-radius: 50%;
@@ -442,47 +440,47 @@ import { User } from '../../shared/models/auth.model';
           }
         }
 
-        .expense-details {
+        .transaction-details {
           flex: 1;
           min-width: 0;
 
-          .expense-header {
+          .transaction-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 0.5rem;
 
-            .expense-description {
+            .transaction-description {
               font-weight: 500;
               color: #333;
               font-size: 1rem;
             }
 
-            .expense-amount {
+            .transaction-amount {
               font-weight: 600;
               color: #3f51b5;
               font-size: 1.1rem;
             }
           }
 
-          .expense-meta {
+          .transaction-meta {
             display: flex;
             gap: 1rem;
             margin-bottom: 0.25rem;
 
-            .expense-category {
+            .transaction-category {
               color: #666;
               font-size: 0.9rem;
               font-weight: 500;
             }
 
-            .expense-date {
+            .transaction-date {
               color: #999;
               font-size: 0.9rem;
             }
           }
 
-          .expense-participants {
+          .transaction-participants {
             small {
               color: #666;
               font-size: 0.85rem;
