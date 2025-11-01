@@ -538,20 +538,33 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   }
 
   private loadTransactions(): void {
+    console.log('Loading transactions - Page:', this.currentPage, 'Size:', this.pageSize);
     this.loading = true;
     
     this.transactionService.getUserTransactions(this.currentPage, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: TransactionListResponse) => {
+          console.log('Transactions loaded successfully:', {
+            count: response.transactions?.length || 0,
+            total: response.total,
+            page: response.page
+          });
           this.transactions = response.transactions || [];
           this.totalTransactions = response.total || 0;
           this.loading = false;
         },
         error: (error) => {
-          console.error('Failed to load transactions:', error);
+          console.error('Failed to load transactions - Status:', error.status, 'Message:', error.message, 'Page:', this.currentPage, 'Error:', error);
           this.loading = false;
           this.transactions = [];
+          
+          // Show user-friendly error message
+          if (error.status === 404) {
+            console.log('Transaction service endpoint not found');
+          } else if (error.status === 0) {
+            console.log('Cannot connect to transaction service');
+          }
         }
       });
   }

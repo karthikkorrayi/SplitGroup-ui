@@ -355,22 +355,30 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private loadUserProfile(): void {
     const currentUser = this.authService.getCurrentUserValue();
     if (!currentUser) {
+      console.error('No current user found for profile loading');
       this.loading = false;
       return;
     }
+
+    console.log('Loading profile for user:', currentUser.id);
 
     this.userService.getUserProfile(currentUser.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (profile: UserProfile) => {
+          console.log('Profile loaded successfully:', profile);
           this.populateForm(profile);
           this.loading = false;
         },
         error: (error: HttpErrorResponse) => {
-          console.error('Failed to load profile:', error);
+          console.error('Failed to load profile - Status:', error.status, 'User ID:', currentUser.id, 'Error:', error);
           // Fallback to current user data
           this.populateFormFromCurrentUser(currentUser);
           this.loading = false;
+          
+          if (error.status === 404) {
+            console.log('Profile not found, using basic user data');
+          }
         }
       });
   }

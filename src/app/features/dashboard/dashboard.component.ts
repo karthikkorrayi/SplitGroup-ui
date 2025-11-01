@@ -589,18 +589,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadDashboardData(): void {
+    console.log('Loading dashboard data...');
     forkJoin({
       balances: this.balanceService.getBalanceSummary(),
       transactions: this.transactionService.getRecentTransactions(5)
     }).pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (data) => {
+        console.log('Dashboard data loaded successfully:', {
+          balances: data.balances,
+          transactionCount: data.transactions?.length || 0
+        });
         this.balanceSummary = data.balances;
         this.recentTransactions = data.transactions || [];
         this.loading = false;
       },
       error: (error) => {
-        console.error('Failed to load dashboard data:', error);
+        console.error('Failed to load dashboard data - Status:', error.status, 'Message:', error.message, 'Full error:', error);
         this.loading = false;
         // Set default values on error
         this.balanceSummary = {
@@ -610,8 +615,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
           balances: []
         };
         this.recentTransactions = [];
+        this.showErrorMessage('Failed to load dashboard data. Please refresh the page.');
       }
     });
+  }
+
+  private showErrorMessage(message: string): void {
+    // You can implement a snackbar or toast notification here
+    console.error('Dashboard Error:', message);
   }
 
   getGreeting(): string {

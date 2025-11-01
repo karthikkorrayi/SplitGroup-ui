@@ -666,6 +666,7 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
       return;
     }
 
+    console.log('Searching for users with query:', query);
     this.searchLoading = true;
     this.searchError = '';
     
@@ -673,20 +674,29 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+          console.log('User search completed:', response);
           this.searchLoading = false;
           this.searchResults = response.users || [];
           
           if (this.searchResults.length === 0) {
             this.searchError = 'User not found or not registered with SplitGroup.';
+            console.log('No users found for query:', query);
           } else {
             this.searchError = '';
+            console.log('Found users:', this.searchResults.map(u => u.name));
           }
         },
         error: (error) => {
           this.searchLoading = false;
-          console.error('Search failed:', error);
+          console.error('User search failed - Status:', error.status, 'URL:', error.url, 'Query:', query, 'Error:', error);
           this.searchResults = [];
-          this.searchError = 'Failed to search users. Please check your connection and try again.';
+          if (error.status === 404) {
+            this.searchError = 'User search service not available. Please try again later.';
+          } else if (error.status === 0) {
+            this.searchError = 'Cannot connect to server. Please check your internet connection.';
+          } else {
+            this.searchError = 'Failed to search users. Please try again.';
+          }
         }
       });
   }
@@ -826,6 +836,7 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     if (this.expenseForm.valid && this.isValidSplit()) {
+      console.log('Submitting expense form...');
       this.saving = true;
       
       const formValue = this.expenseForm.value;
@@ -841,20 +852,40 @@ export class AddExpenseComponent implements OnInit, OnDestroy {
         participants: participants
       };
 
+      console.log('Transaction request:', transactionRequest);
+
       this.transactionService.createTransaction(transactionRequest)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (transaction) => {
+            console.log('Transaction created successfully:', transaction);
             this.saving = false;
             this.showMessage('Transaction created successfully!', 'success-snackbar');
             this.router.navigate(['/transactions']);
           },
           error: (error) => {
             this.saving = false;
-            console.error('Failed to create transaction:', error);
-            this.showMessage(error.message || 'Failed to create transaction. Please try again.', 'error-snackbar');
+            console.error('Failed to create transaction - Status:', error.status, 'Message:', error.message, 'Request:', transactionRequest, 'Error:', error);
+            
+            let errorMessage = 'Failed to create transaction. Please try again.';
+            if (error.status === 400) {
+              errorMessage = 'Invalid transaction data. Please check your inputs.';
+            } else if (error.status === 404) {
+              errorMessage = 'Transaction service not available. Please try again later.';
+            } else if (error.status === 0) {
+              errorMessage = 'Cannot connect to server. Please check your internet connection.';
+            }
+            
+            this.showMessage(errorMessage, 'error-snackbar');
           }
         });
+    } else {
+      console.log('Form validation failed:', {
+        formValid: this.expenseForm.valid,
+        validSplit: this.isValidSplit(),
+        formErrors: this.expenseForm.errors,
+        participantCount: this.participantsArray.length
+      });
     }
   }
 

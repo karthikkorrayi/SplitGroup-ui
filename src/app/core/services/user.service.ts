@@ -47,6 +47,7 @@ export class UserService {
 
   // GET /api/users/search?query={query} - Search users by email or name
   searchUsers(query: string): Observable<SearchUsersResponse> {
+    console.log('Searching users with query:', query);
     return this.http.get<User[]>(`${this.API_URL}/search`, {
       params: { query }
     }).pipe(
@@ -54,8 +55,9 @@ export class UserService {
         users: users,
         total: users.length
       })),
+      tap(response => console.log('User search response:', response)),
       catchError(error => {
-        console.error('User search failed:', error);
+        console.error('User search failed - Status:', error.status, 'URL:', `${this.API_URL}/search`, 'Query:', query, 'Error:', error);
         return of({ users: [], total: 0 });
       })
     );

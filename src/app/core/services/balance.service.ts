@@ -45,6 +45,7 @@ export class BalanceService {
 
   // GET /api/balances/summary
   getBalanceSummary(): Observable<BalanceSummary> {
+    console.log('Fetching balance summary');
     return this.http.get<BalanceSummary>(`${this.API_URL}/summary`);
   }
 

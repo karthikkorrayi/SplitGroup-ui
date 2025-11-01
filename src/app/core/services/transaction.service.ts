@@ -52,20 +52,24 @@ export class TransactionService {
 
   // POST /api/transactions - Create new transaction
   createTransaction(transaction: CreateTransactionRequest): Observable<Transaction> {
+    console.log('Creating transaction:', transaction);
     return this.http.post<Transaction>(this.API_URL, transaction)
       .pipe(
+        tap(response => console.log('Transaction created successfully:', response)),
         catchError(this.handleError)
       );
   }
 
   // GET /api/transactions - Get user transactions with pagination
   getUserTransactions(page: number = 0, size: number = 20): Observable<TransactionListResponse> {
+    console.log('Fetching user transactions - Page:', page, 'Size:', size);
     return this.http.get<TransactionListResponse>(this.API_URL, {
       params: { 
         page: page.toString(), 
         size: size.toString() 
       }
     }).pipe(
+      tap(response => console.log('Transactions fetched:', response.transactions?.length || 0, 'Total:', response.total)),
       catchError(this.handleError)
     );
   }

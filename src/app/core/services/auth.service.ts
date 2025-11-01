@@ -42,10 +42,10 @@ export class AuthService {
         tap(response => {
           this.storeAuthData(response);
           this.showMessage('Login successful!', 'success-snackbar');
-          console.log('Login successful:', response);
+          console.log('Login successful - User:', response.name, 'Token length:', response.token.length);
         }),
         catchError(error => {
-          console.error('Login error:', error);
+          console.error('Login error - Status:', error.status, 'Message:', error.message, 'Full error:', error);
           return this.handleError(error);
         }),
         tap(() => this.setLoading(false))
