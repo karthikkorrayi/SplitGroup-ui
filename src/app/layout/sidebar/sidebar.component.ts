@@ -49,6 +49,11 @@ export class SidebarComponent {
       route: '/expenses/add'
     },
     {
+      label: 'Split Expense',
+      icon: 'call_split',
+      route: '/expenses/split'
+    },
+    {
       label: 'Transaction History',
       icon: 'receipt_long',
       route: '/transactions'

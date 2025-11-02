@@ -682,6 +682,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/expenses/add']);
   }
 
+  onSplitExpense(): void {
+    this.router.navigate(['/expenses/split']);
+  }
+
   onViewAllExpenses(): void {
     this.router.navigate(['/transactions']);
   }

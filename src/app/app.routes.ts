@@ -66,6 +66,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/profile/profile.component').then(c => c.ProfileComponent)
       },
       {
+        path: 'split',
+        loadComponent: () => import('./features/expenses/split-expense/split-expense.component').then(c => c.SplitExpenseComponent)
+      },
+      {
         path: '',
         redirectTo: '/dashboard',
         pathMatch: 'full'
