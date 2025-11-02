@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, forkJoin } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
@@ -118,7 +118,7 @@ export class ExpenseSplitService {
         };
       }),
       // Step 2: Create the expense/transaction
-      map(({ validatedParticipants, splitCalculation, currentUser }) => {
+      switchMap(({ validatedParticipants, splitCalculation, currentUser }) => {
         // Create transaction request
         const transactionRequest = {
           description: request.description,
@@ -157,9 +157,6 @@ export class ExpenseSplitService {
           })
         );
       }),
-      // Flatten the nested observable
-      map(transactionObservable => transactionObservable),
-      // Handle the inner observable
       catchError(error => {
         console.error('Expense split error:', error);
         if (error.status && error.message) {

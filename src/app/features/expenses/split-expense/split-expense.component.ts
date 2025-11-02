@@ -232,8 +232,8 @@ import { AuthService } from '../../../core/services/auth.service';
 
           <div *ngIf="splitResult.remainderHandling?.hasRemainder" class="remainder-info">
             <mat-icon>info</mat-icon>
-            <span>Remainder of ₹{{ splitResult.remainderHandling.remainderAmount.toFixed(2) }} 
-                  assigned to {{ splitResult.remainderHandling.assignedTo }}</span>
+            <span>Remainder of ₹{{ splitResult.remainderHandling?.remainderAmount?.toFixed(2) }} 
+                  assigned to {{ splitResult.remainderHandling?.assignedTo }}</span>
           </div>
         </mat-card-content>
         <mat-card-actions>
